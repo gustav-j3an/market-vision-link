@@ -26,13 +26,12 @@ export function usePromotorRoteiros() {
 
         if (promotorError) throw promotorError;
 
-        if (!promotorData || !promotorData.id) {
+        if (!promotorData) {
           setRoteiros([]);
           return;
         }
 
         const today = new Date().toISOString().split('T')[0];
-        const promotorId = promotorData.id as string;
         
         const { data, error } = await supabase
           .from('roteiros')
@@ -46,15 +45,15 @@ export function usePromotorRoteiros() {
               cidade
             )
           `)
-          .eq('promotor_id', promotorId)
+          .eq('promotor_id', promotorData.id)
           .eq('data_prevista', today)
           .order('horario_previsto', { ascending: true });
 
         if (error) throw error;
         
-        setRoteiros(data.map(r => ({
+        setRoteiros((data || []).map(r => ({
           ...r,
-          loja: r.lojas
+          loja: (r as any).lojas
         })) as unknown as Roteiro[]);
       } catch (err: any) {
         console.error("Error fetching promotor roteiros:", err);

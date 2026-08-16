@@ -30,7 +30,7 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
     { nome: "Cerveja Artesanal Br 600ml", marca: "Cervejaria BR", categoria: "Bebidas", sku: "CER-001", empresa_id: empresaId },
     { nome: "Água Pura 500ml", marca: "Água Pura", categoria: "Bebidas", sku: "AGU-001", empresa_id: empresaId },
     { nome: "Refrigerante Cola 2L", marca: "RefrescaCo", categoria: "Bebidas", sku: "REF-001", empresa_id: empresaId },
-  ].filter(p => !existingSkus.includes(p.sku));
+  ].filter(p => !existingSkus.includes(p.sku || ""));
 
   if (productsToInsert.length > 0) {
     const { error: productsError } = await supabase.from("produtos").insert(productsToInsert);
@@ -63,14 +63,13 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
   if (promotorError) throw promotorError;
 
   // 5. Seed Roteiros for Today
-  if (promotorRecord && promotorRecord.id && allStores && allStores.length > 0) {
+  if (promotorRecord && allStores && allStores.length > 0) {
     const today = new Date().toISOString().split('T')[0];
-    const promotorId = promotorRecord.id as string;
     
     const { data: existingRoteiros } = await supabase
       .from("roteiros")
       .select("loja_id")
-      .eq("promotor_id", promotorId)
+      .eq("promotor_id", promotorRecord.id)
       .eq("data_prevista", today);
       
     const existingStoreIds = existingRoteiros?.map(r => r.loja_id) || [];
@@ -78,7 +77,7 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
     const roteirosToInsert = allStores
       .filter(s => !existingStoreIds.includes(s.id))
       .map(store => ({
-        promotor_id: promotorId,
+        promotor_id: promotorRecord.id,
         loja_id: store.id,
         data_prevista: today,
         horario_previsto: "09:00",
