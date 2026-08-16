@@ -28,9 +28,9 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
     { nome: "Refrigerante Cola 2L", marca: "RefrescaCo", categoria: "Bebidas", sku: "REF-001", empresa_id: empresaId },
   ];
   
-  const productSkus = productsList.map(p => p.sku);
-  const { data: existingProducts } = await supabase.from("produtos").select("id, sku").eq("empresa_id", empresaId).in("sku", productSkus as string[]);
-  const existingSkus = existingProducts?.map(p => p.sku) || [];
+  const productSkus = productsList.map(p => p.sku).filter(Boolean) as string[];
+  const { data: existingProducts } = await supabase.from("produtos").select("id, sku").eq("empresa_id", empresaId).in("sku", productSkus);
+  const existingSkus = existingProducts?.map(p => p.sku).filter(Boolean) as string[] || [];
 
   const productsToInsert = productsList.filter(p => p.sku && !existingSkus.includes(p.sku));
 
