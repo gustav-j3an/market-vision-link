@@ -58,7 +58,6 @@ export async function createRoteiro(roteiro: {
   data_prevista: string;
   horario_previsto: string | null;
   empresa_id: string;
-  observacoes?: string | null;
   status?: RoteiroStatus;
 }) {
   // Check for duplicates
@@ -92,7 +91,6 @@ export async function updateRoteiro(id: string, roteiro: Partial<{
   loja_id: string;
   data_prevista: string;
   horario_previsto: string | null;
-  observacoes?: string | null;
   status?: RoteiroStatus;
 }>) {
   const { data, error } = await supabase
