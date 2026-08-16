@@ -14,7 +14,7 @@ export const Route = createFileRoute("/onboarding")({
 });
 
 function OnboardingComponent() {
-  const { user, profile, isLoading, refreshProfile } = useAuth();
+  const { user, profile, isLoading, profileError, refreshProfile } = useAuth();
   const [companyName, setCompanyName] = useState("");
   const [gestorName, setGestorName] = useState(profile?.nome || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
