@@ -16,6 +16,7 @@ export const Route = createFileRoute("/gestor/promotores/")({
 function Promotores() {
   const { profile } = useAuth();
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedPromoter, setSelectedPromoter] = useState<any>(null);
   const [promoters, setPromoters] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -47,7 +48,10 @@ function Promotores() {
         title="Promotores" 
         description="Equipe em campo e indicadores de performance."
         actions={
-          <Button onClick={() => setIsFormOpen(true)}>
+          <Button onClick={() => {
+            setSelectedPromoter(null);
+            setIsFormOpen(true);
+          }}>
             <Plus className="mr-2 h-4 w-4" /> Novo Promotor
           </Button>
         }
@@ -63,7 +67,10 @@ function Promotores() {
             <Users className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-medium">Nenhum promotor cadastrado</h3>
             <p className="text-muted-foreground mb-6">Adicione promotores para gerenciar seus roteiros.</p>
-            <Button onClick={() => setIsFormOpen(true)}>Cadastrar Primeiro Promotor</Button>
+            <Button onClick={() => {
+              setSelectedPromoter(null);
+              setIsFormOpen(true);
+            }}>Cadastrar Primeiro Promotor</Button>
           </CardContent>
         </Card>
       ) : (
@@ -92,6 +99,7 @@ function Promotores() {
         open={isFormOpen} 
         onOpenChange={setIsFormOpen} 
         onSuccess={fetchPromoters} 
+        promoter={selectedPromoter}
       />
     </>
   );
