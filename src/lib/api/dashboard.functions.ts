@@ -25,18 +25,20 @@ export const getDashboardStats = createServerFn({ method: "GET" })
 
     const startIso = startDate.toISOString();
     const endIso = endOfDay(now).toISOString();
+    const startDateStr = format(startDate, 'yyyy-MM-dd');
+    const todayStr = format(now, 'yyyy-MM-dd');
 
     // 1. Visitas stats
     const { data: totalRoteiros } = await supabase
       .from('roteiros')
       .select('id', { count: 'exact' })
       .eq('empresa_id', empresaId)
-      .gte('data_prevista', format(startDate, 'yyyy-MM-dd'))
-      .lte('data_prevista', format(now, 'yyyy-MM-dd'));
+      .gte('data_prevista', startDateStr)
+      .lte('data_prevista', todayStr);
 
     const { data: visitasConcluidas } = await supabase
       .from('visitas')
-      .select('id, nota_execucao, loja_id, promotor_id', { count: 'exact' })
+      .select('id, nota_execucao, loja_id, promotor_id, inicio', { count: 'exact' })
       .eq('empresa_id', empresaId)
       .eq('status', 'concluido')
       .gte('inicio', startIso)
@@ -45,19 +47,19 @@ export const getDashboardStats = createServerFn({ method: "GET" })
     // 2. Ruptura stats
     const visitaIds = (visitasConcluidas || []).map(v => v.id);
     let taxaRuptura = 0;
-    let rupturas = 0;
+    let rupturasCount = 0;
     let itensVisita: any[] = [];
 
     if (visitaIds.length > 0) {
       const { data: itens } = await supabase
         .from('itens_visita')
-        .select('status, produto_id, visita_id')
+        .select('status, produto_id, visita_id, produtos(nome, categoria)')
         .in('visita_id', visitaIds);
       
       itensVisita = itens || [];
       const totalItens = itensVisita.length;
-      rupturas = itensVisita.filter(i => i.status === 'ruptura').length;
-      taxaRuptura = totalItens > 0 ? (rupturas / totalItens) * 100 : 0;
+      rupturasCount = itensVisita.filter(i => i.status === 'nao_encontrado' || i.status === 'ruptura').length;
+      taxaRuptura = totalItens > 0 ? (rupturasCount / totalItens) * 100 : 0;
     }
 
     // 3. Execução média
@@ -75,7 +77,7 @@ export const getDashboardStats = createServerFn({ method: "GET" })
       .from('roteiros')
       .select('*, lojas(nome)')
       .eq('empresa_id', empresaId)
-      .eq('data_prevista', format(now, 'yyyy-MM-dd'));
+      .eq('data_prevista', todayStr);
 
     const alertas = [];
     
@@ -91,20 +93,44 @@ export const getDashboardStats = createServerFn({ method: "GET" })
     }
 
     // Alerta de baixa execução
-    const baixaExecucao = visitasConcluidas?.filter(v => v.nota_execucao !== null && v.nota_execucao! < 7) || [];
+    const baixaExecucao = visitasConcluidas?.filter(v => v.nota_execucao !== null && v.nota_execucao! < 70) || [];
     if (baixaExecucao.length > 0) {
       alertas.push({
         type: 'baixa_execucao',
         title: 'Baixa Qualidade de Execução',
-        description: `${baixaExecucao.length} visitas registradas com nota abaixo de 7.`,
+        description: `${baixaExecucao.length} visitas registradas com nota abaixo de 70%.`,
         severity: 'destructive'
       });
     }
 
-    // Ranking de rupturas por produto
-    const rupturaPorProduto: Record<string, number> = {};
-    itensVisita.filter(i => i.status === 'ruptura').forEach(i => {
-      rupturaPorProduto[i.produto_id] = (rupturaPorProduto[i.produto_id] || 0) + 1;
+    // Ranking de produtos com mais ruptura
+    const rupturaPorProduto: Record<string, { nome: string, count: number }> = {};
+    itensVisita
+      .filter(i => i.status === 'nao_encontrado' || i.status === 'ruptura')
+      .forEach(i => {
+        const nome = i.produtos?.nome || 'Desconhecido';
+        if (!rupturaPorProduto[i.produto_id]) {
+          rupturaPorProduto[i.produto_id] = { nome, count: 0 };
+        }
+        rupturaPorProduto[i.produto_id].count++;
+      });
+    
+    const rankingRuptura = Object.values(rupturaPorProduto)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+
+    // Gráfico de evolução diária (últimos 7 dias)
+    const evolucaoVisitas: Record<string, number> = {};
+    for (let i = 6; i >= 0; i--) {
+      const d = format(subDays(now, i), 'dd/MM');
+      evolucaoVisitas[d] = 0;
+    }
+
+    visitasConcluidas?.forEach(v => {
+      const d = format(new Date(v.inicio), 'dd/MM');
+      if (evolucaoVisitas[d] !== undefined) {
+        evolucaoVisitas[d]++;
+      }
     });
 
     return {
@@ -117,6 +143,7 @@ export const getDashboardStats = createServerFn({ method: "GET" })
         promotoresAtivos
       },
       alertas,
-      rupturas
+      rankingRuptura,
+      evolucao: Object.entries(evolucaoVisitas).map(([name, total]) => ({ name, total }))
     };
   });

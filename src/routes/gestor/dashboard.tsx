@@ -3,12 +3,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Database, Loader2, AlertTriangle, TrendingDown, CheckCircle2, Users, ShoppingBag } from "lucide-react";
+import { Database, Loader2, AlertTriangle, TrendingDown, CheckCircle2, ShoppingBag, PackageX, BarChart3 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { seedDemoData } from "@/utils/seed-demo-data";
 import { toast } from "sonner";
 import { getDashboardStats } from "@/lib/api/dashboard.functions";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 
 export const Route = createFileRoute("/gestor/dashboard")({
   component: Dashboard,
@@ -25,7 +26,7 @@ function Dashboard() {
     setIsLoading(true);
     try {
       const data = await getDashboardStats({ 
-        data: { empresaId: profile.empresa_id, period: 'day' } 
+        data: { empresaId: profile.empresa_id, period: 'week' } 
       });
       setStats(data);
     } catch (error) {
@@ -46,7 +47,7 @@ function Dashboard() {
     try {
       await seedDemoData(profile.empresa_id, profile.id);
       toast.success("Dados de demonstração carregados com sucesso!");
-      loadStats(); // Recarregar estatísticas após seed
+      await loadStats();
     } catch (error: any) {
       toast.error("Erro ao carregar dados: " + error.message);
     } finally {
@@ -72,22 +73,22 @@ function Dashboard() {
     },
     { 
       title: "Taxa de Ruptura", 
-      value: stats?.stats?.taxaRuptura || "0%", 
-      subtitle: "Itens não encontrados",
-      icon: TrendingDown,
+      value: stats?.stats?.taxaRuptura || "0.0%", 
+      subtitle: "Itens em falta",
+      icon: PackageX,
       color: "text-red-600"
     },
     { 
       title: "Execução Média", 
-      value: stats?.stats?.execucaoMedia || "0%", 
-      subtitle: "Qualidade da exposição",
-      icon: TrendingDown,
+      value: stats?.stats?.execucaoMedia || "0.0%", 
+      subtitle: "Conformidade no PDV",
+      icon: BarChart3,
       color: "text-blue-600"
     },
     { 
-      title: "Lojas Visitadas", 
-      value: stats?.stats?.lojasVisitadas || 0, 
-      subtitle: "Pontos de venda únicos",
+      title: "Promotores Ativos", 
+      value: stats?.stats?.promotoresAtivos || 0, 
+      subtitle: "Equipe em campo",
       icon: ShoppingBag,
       color: "text-purple-600"
     },
@@ -96,8 +97,8 @@ function Dashboard() {
   return (
     <>
       <PageHeader 
-        title="Visão Geral" 
-        description="Resumo do desempenho da operação hoje."
+        title="Dashboard Executivo" 
+        description="Acompanhamento em tempo real da execução em campo."
         actions={
           <Button variant="outline" onClick={handleSeed} disabled={isSeeding}>
             {isSeeding ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Database className="mr-2 h-4 w-4" />}
@@ -121,13 +122,13 @@ function Dashboard() {
         ))}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Seção de Alertas */}
-        <Card className="col-span-1">
+      <div className="grid gap-6 lg:grid-cols-3 mb-8">
+        {/* Alertas */}
+        <Card className="lg:col-span-1">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-lg">
               <AlertTriangle className="h-5 w-5 text-amber-500" />
-              Alertas da Operação
+              Alertas Prioritários
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -137,11 +138,9 @@ function Dashboard() {
                   <div key={idx} className={`p-4 rounded-lg border flex gap-3 ${
                     alerta.severity === 'destructive' ? 'bg-red-50 border-red-100' : 'bg-amber-50 border-amber-100'
                   }`}>
-                    <div className="mt-1">
-                      <AlertTriangle className={`h-4 w-4 ${
-                        alerta.severity === 'destructive' ? 'text-red-600' : 'text-amber-600'
-                      }`} />
-                    </div>
+                    <AlertTriangle className={`h-4 w-4 shrink-0 mt-0.5 ${
+                      alerta.severity === 'destructive' ? 'text-red-600' : 'text-amber-600'
+                    }`} />
                     <div>
                       <h4 className={`text-sm font-bold ${
                         alerta.severity === 'destructive' ? 'text-red-900' : 'text-amber-900'
@@ -152,42 +151,102 @@ function Dashboard() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 border border-dashed rounded-lg">
-                <p className="text-sm text-muted-foreground">Tudo certo! Nenhum alerta crítico hoje.</p>
+              <div className="text-center py-12 border border-dashed rounded-lg bg-slate-50/50">
+                <CheckCircle2 className="mx-auto h-8 w-8 text-green-500 opacity-20 mb-2" />
+                <p className="text-sm text-muted-foreground">Toda a operação está em conformidade.</p>
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Placeholder para Gráficos Futuros */}
-        <Card className="col-span-1">
+        {/* Evolução de Visitas */}
+        <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Desempenho da Semana</CardTitle>
+            <CardTitle className="text-lg">Evolução Diária de Visitas</CardTitle>
           </CardHeader>
-          <CardContent className="h-[200px] flex items-center justify-center border border-dashed rounded-lg m-6">
-            <div className="text-center">
-              <TrendingDown className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-20" />
-              <p className="text-sm text-muted-foreground">Gráficos de tendência em desenvolvimento.</p>
-            </div>
+          <CardContent className="h-[300px] w-full pt-4">
+            {stats?.evolucao?.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={stats.evolucao}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis fontSize={12} tickLine={false} axisLine={false} width={30} />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="total" 
+                    stroke="#003366" 
+                    strokeWidth={3} 
+                    dot={{ fill: '#003366', r: 4 }} 
+                    activeDot={{ r: 6 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center border border-dashed rounded-lg">
+                <p className="text-sm text-muted-foreground">Sem dados históricos suficientes.</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
 
-      {stats?.stats?.visitasPlanejadas === 0 && !isSeeding && (
-        <Card className="mt-8 bg-blue-50 border-blue-100">
-          <CardContent className="p-6 flex items-center gap-4">
-            <div className="bg-blue-100 p-3 rounded-full text-blue-700">
-              <Database size={24} />
-            </div>
-            <div>
-              <h3 className="font-bold text-blue-900">Comece sua operação</h3>
-              <p className="text-sm text-blue-700">
-                Ainda não há roteiros planejados para hoje. Crie um roteiro ou use o botão "Carregar Dados Demo" acima para testar o sistema.
-              </p>
-            </div>
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Ranking de Rupturas */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Produtos em Ruptura Crítica</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {stats?.rankingRuptura?.length > 0 ? (
+              <div className="space-y-4">
+                {stats.rankingRuptura.map((prod: any, idx: number) => (
+                  <div key={idx} className="flex items-center justify-between group">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded bg-red-100 flex items-center justify-center text-red-700 font-bold text-xs">
+                        {idx + 1}
+                      </div>
+                      <span className="text-sm font-medium">{prod.nome}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-red-600">{prod.count}</span>
+                      <span className="text-xs text-muted-foreground uppercase">ocorrências</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-10 border border-dashed rounded-lg">
+                <p className="text-sm text-muted-foreground">Nenhuma ruptura registrada no período.</p>
+              </div>
+            )}
           </CardContent>
         </Card>
-      )}
+
+        {/* Informação Incial */}
+        {stats?.stats?.visitasPlanejadas === 0 && !isSeeding && (
+          <Card className="bg-blue-50 border-blue-100 flex flex-col justify-center">
+            <CardContent className="p-8 text-center">
+              <div className="bg-blue-100 p-4 rounded-full text-blue-700 w-fit mx-auto mb-4">
+                <Database size={32} />
+              </div>
+              <h3 className="text-lg font-bold text-blue-900 mb-2">Primeiros Passos</h3>
+              <p className="text-sm text-blue-700 max-w-sm mx-auto">
+                Não identificamos roteiros planejados. Cadastre roteiros para seus promotores ou use os dados de demonstração para explorar os recursos analíticos.
+              </p>
+              <Button 
+                onClick={() => toast.info("Navegue até a aba 'Roteiros' para cadastrar.")} 
+                variant="link" 
+                className="mt-4 text-blue-700 underline"
+              >
+                Como criar roteiros?
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </>
   );
 }
