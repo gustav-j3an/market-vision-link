@@ -62,7 +62,7 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
   
   if (promotorError) throw promotorError;
 
-  const promotorId = promotorRecord?.id;
+  const promotorId: string | undefined = promotorRecord?.id;
 
   // 5. Seed Roteiros for Today
   if (promotorId && allStores && allStores.length > 0) {
