@@ -15,7 +15,25 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  const { user, profile, isLoading } = useAuth();
   const navigate = useNavigate();
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Se já estiver logado, redireciona conforme o perfil
+  if (user && profile) {
+    if (profile.tipo === "gestor") {
+      return <Navigate to="/gestor/dashboard" />;
+    } else {
+      return <Navigate to="/promotor/roteiro" />;
+    }
+  }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4 text-foreground">
@@ -25,7 +43,7 @@ function Index() {
       </div>
 
       <div className="grid w-full max-w-2xl gap-6 md:grid-cols-2">
-        <Card className="hover:border-primary transition-all cursor-pointer group" onClick={() => navigate({ to: "/gestor/dashboard" as any })}>
+        <Card className="hover:border-primary transition-all cursor-pointer group" onClick={() => navigate({ to: "/auth/login" as any })}>
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
               <Briefcase size={32} />
@@ -34,11 +52,11 @@ function Index() {
             <CardDescription>Acesse dashboards analíticos e relatórios estratégicos.</CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center">
-            <Button variant="outline" className="w-full">Acessar Painel</Button>
+            <Button variant="outline" className="w-full">Entrar / Cadastrar</Button>
           </CardContent>
         </Card>
 
-        <Card className="hover:border-primary transition-all cursor-pointer group" onClick={() => navigate({ to: "/promotor/roteiro" as any })}>
+        <Card className="hover:border-primary transition-all cursor-pointer group" onClick={() => navigate({ to: "/auth/login" as any })}>
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
               <UserCircle size={32} />
@@ -47,7 +65,7 @@ function Index() {
             <CardDescription>Gerencie seu roteiro e registre suas visitas diárias.</CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center">
-            <Button variant="outline" className="w-full">Iniciar Roteiro</Button>
+            <Button variant="outline" className="w-full">Entrar</Button>
           </CardContent>
         </Card>
       </div>
