@@ -3,13 +3,15 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Database, Loader2, AlertTriangle, TrendingDown, CheckCircle2, ShoppingBag, PackageX, BarChart3 } from "lucide-react";
+import { Database, Loader2, AlertTriangle, CheckCircle2, ShoppingBag, PackageX, BarChart3, Factory } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { seedDemoData } from "@/utils/seed-demo-data";
 import { toast } from "sonner";
 import { getDashboardStats } from "@/lib/api/dashboard.functions";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { getIndustrias, Industria } from "@/lib/api/industrias";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/gestor/dashboard")({
   component: Dashboard,
@@ -20,13 +22,29 @@ function Dashboard() {
   const [isSeeding, setIsSeeding] = useState(false);
   const [stats, setStats] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [industrias, setIndustrias] = useState<Industria[]>([]);
+  const [selectedIndustria, setSelectedIndustria] = useState<string>("all");
+
+  const loadInitialData = async () => {
+    if (!profile?.empresa_id) return;
+    try {
+      const data = await getIndustrias(profile.empresa_id);
+      setIndustrias(data);
+    } catch (error) {
+      console.error("Erro ao carregar indústrias:", error);
+    }
+  };
 
   const loadStats = async () => {
     if (!profile?.empresa_id) return;
     setIsLoading(true);
     try {
       const data = await getDashboardStats({ 
-        data: { empresaId: profile.empresa_id, period: 'week' } 
+        data: { 
+          empresaId: profile.empresa_id, 
+          period: 'week',
+          industriaId: selectedIndustria === "all" ? undefined : selectedIndustria
+        } 
       });
       setStats(data);
     } catch (error) {
@@ -38,8 +56,12 @@ function Dashboard() {
   };
 
   useEffect(() => {
-    loadStats();
+    loadInitialData();
   }, [profile?.empresa_id]);
+
+  useEffect(() => {
+    loadStats();
+  }, [profile?.empresa_id, selectedIndustria]);
 
   const handleSeed = async () => {
     if (!profile?.empresa_id) return;
@@ -47,6 +69,7 @@ function Dashboard() {
     try {
       await seedDemoData(profile.empresa_id, profile.id);
       toast.success("Dados de demonstração carregados com sucesso!");
+      await loadInitialData();
       await loadStats();
     } catch (error: any) {
       toast.error("Erro ao carregar dados: " + error.message);
@@ -55,7 +78,7 @@ function Dashboard() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading && !stats) {
     return (
       <div className="flex h-[80vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -100,10 +123,27 @@ function Dashboard() {
         title="Dashboard Executivo" 
         description="Acompanhamento em tempo real da execução em campo."
         actions={
-          <Button variant="outline" onClick={handleSeed} disabled={isSeeding}>
-            {isSeeding ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Database className="mr-2 h-4 w-4" />}
-            Carregar Dados Demo
-          </Button>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 bg-white rounded-md border px-3 h-10">
+              <Factory className="h-4 w-4 text-muted-foreground" />
+              <Select value={selectedIndustria} onValueChange={setSelectedIndustria}>
+                <SelectTrigger className="border-none shadow-none focus:ring-0 w-[180px] h-8 p-0">
+                  <SelectValue placeholder="Todas as Indústrias" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as Indústrias</SelectItem>
+                  {industrias.map(ind => (
+                    <SelectItem key={ind.id} value={ind.id}>{ind.nome}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <Button variant="outline" onClick={handleSeed} disabled={isSeeding}>
+              {isSeeding ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Database className="mr-2 h-4 w-4" />}
+              Carregar Dados Demo
+            </Button>
+          </div>
         }
       />
 
