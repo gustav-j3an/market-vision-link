@@ -50,6 +50,7 @@ export function Sidebar({ type = "gestor" }: { type?: "gestor" | "promotor" }) {
   
   const gestorItems = [
     { icon: LayoutDashboard, label: "Visão Geral", href: "/gestor/dashboard" },
+    { icon: RouteIcon, label: "Roteiros", href: "/gestor/roteiros" },
     { icon: BarChart3, label: "Analytics", href: "/gestor/analytics" },
     { icon: MapPin, label: "Lojas", href: "/gestor/lojas" },
     { icon: Package, label: "Produtos", href: "/gestor/produtos" },

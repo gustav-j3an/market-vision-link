@@ -22,6 +22,7 @@ import { Route as GestorProdutosIndexRouteImport } from './routes/gestor/produto
 import { Route as GestorPromotoresIndexRouteImport } from './routes/gestor/promotores/index'
 import { Route as GestorRelatoriosIndexRouteImport } from './routes/gestor/relatorios/index'
 import { Route as GestorVisitasIndexRouteImport } from './routes/gestor/visitas/index'
+import { Route as PromotorVisitaVisitaIdRouteImport } from './routes/promotor/visita/$visitaId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -88,6 +89,11 @@ const GestorVisitasIndexRoute = GestorVisitasIndexRouteImport.update({
   path: '/visitas/',
   getParentRoute: () => GestorRoute,
 } as any)
+const PromotorVisitaVisitaIdRoute = PromotorVisitaVisitaIdRouteImport.update({
+  id: '/visita/$visitaId',
+  path: '/visita/$visitaId',
+  getParentRoute: () => PromotorRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -98,6 +104,7 @@ export interface FileRoutesByFullPath {
   '/auth/signup': typeof AuthSignupRoute
   '/gestor/dashboard': typeof GestorDashboardRoute
   '/promotor/roteiro': typeof PromotorRoteiroRoute
+  '/promotor/visita/$visitaId': typeof PromotorVisitaVisitaIdRoute
   '/gestor/lojas/': typeof GestorLojasIndexRoute
   '/gestor/produtos/': typeof GestorProdutosIndexRoute
   '/gestor/promotores/': typeof GestorPromotoresIndexRoute
@@ -113,6 +120,7 @@ export interface FileRoutesByTo {
   '/auth/signup': typeof AuthSignupRoute
   '/gestor/dashboard': typeof GestorDashboardRoute
   '/promotor/roteiro': typeof PromotorRoteiroRoute
+  '/promotor/visita/$visitaId': typeof PromotorVisitaVisitaIdRoute
   '/gestor/lojas': typeof GestorLojasIndexRoute
   '/gestor/produtos': typeof GestorProdutosIndexRoute
   '/gestor/promotores': typeof GestorPromotoresIndexRoute
@@ -129,6 +137,7 @@ export interface FileRoutesById {
   '/auth/signup': typeof AuthSignupRoute
   '/gestor/dashboard': typeof GestorDashboardRoute
   '/promotor/roteiro': typeof PromotorRoteiroRoute
+  '/promotor/visita/$visitaId': typeof PromotorVisitaVisitaIdRoute
   '/gestor/lojas/': typeof GestorLojasIndexRoute
   '/gestor/produtos/': typeof GestorProdutosIndexRoute
   '/gestor/promotores/': typeof GestorPromotoresIndexRoute
@@ -146,6 +155,7 @@ export interface FileRouteTypes {
     | '/auth/signup'
     | '/gestor/dashboard'
     | '/promotor/roteiro'
+    | '/promotor/visita/$visitaId'
     | '/gestor/lojas/'
     | '/gestor/produtos/'
     | '/gestor/promotores/'
@@ -161,6 +171,7 @@ export interface FileRouteTypes {
     | '/auth/signup'
     | '/gestor/dashboard'
     | '/promotor/roteiro'
+    | '/promotor/visita/$visitaId'
     | '/gestor/lojas'
     | '/gestor/produtos'
     | '/gestor/promotores'
@@ -176,6 +187,7 @@ export interface FileRouteTypes {
     | '/auth/signup'
     | '/gestor/dashboard'
     | '/promotor/roteiro'
+    | '/promotor/visita/$visitaId'
     | '/gestor/lojas/'
     | '/gestor/produtos/'
     | '/gestor/promotores/'
@@ -285,6 +297,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GestorVisitasIndexRouteImport
       parentRoute: typeof GestorRoute
     }
+    '/promotor/visita/$visitaId': {
+      id: '/promotor/visita/$visitaId'
+      path: '/visita/$visitaId'
+      fullPath: '/promotor/visita/$visitaId'
+      preLoaderRoute: typeof PromotorVisitaVisitaIdRouteImport
+      parentRoute: typeof PromotorRoute
+    }
   }
 }
 
@@ -311,10 +330,12 @@ const GestorRouteWithChildren =
 
 interface PromotorRouteChildren {
   PromotorRoteiroRoute: typeof PromotorRoteiroRoute
+  PromotorVisitaVisitaIdRoute: typeof PromotorVisitaVisitaIdRoute
 }
 
 const PromotorRouteChildren: PromotorRouteChildren = {
   PromotorRoteiroRoute: PromotorRoteiroRoute,
+  PromotorVisitaVisitaIdRoute: PromotorVisitaVisitaIdRoute,
 }
 
 const PromotorRouteWithChildren = PromotorRoute._addFileChildren(
