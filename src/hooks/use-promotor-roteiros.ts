@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { Roteiro } from '@/lib/api/roteiros';
 
 export function usePromotorRoteiros() {
-  const { user, profile } = useAuth();
+  const { profile } = useAuth();
   const [roteiros, setRoteiros] = useState<Roteiro[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -17,7 +17,6 @@ export function usePromotorRoteiros() {
       try {
         setLoading(true);
         
-        // Find the promotor record for this profile
         const { data: promotorData, error: promotorError } = await supabase
           .from('promotores')
           .select('id')
@@ -26,11 +25,14 @@ export function usePromotorRoteiros() {
 
         if (promotorError) throw promotorError;
 
-        if (!promotorData) {
+        if (!promotorData?.id) {
           setRoteiros([]);
           return;
         }
 
+        const today = new Date().toISOString().split('T')[0];
+        const promotorId = promotorData.id;
+        
         const { data, error } = await supabase
           .from('roteiros')
           .select(`
@@ -43,15 +45,15 @@ export function usePromotorRoteiros() {
               cidade
             )
           `)
-          .eq('promotor_id', promotorData.id)
-          .order('data_prevista', { ascending: true })
+          .filter('promotor_id', 'eq', promotorId)
+          .filter('data_prevista', 'eq', today)
           .order('horario_previsto', { ascending: true });
 
         if (error) throw error;
         
-        setRoteiros(data.map(r => ({
+        setRoteiros((data || []).map(r => ({
           ...r,
-          loja: r.lojas
+          loja: (r as any).lojas
         })) as unknown as Roteiro[]);
       } catch (err: any) {
         console.error("Error fetching promotor roteiros:", err);
