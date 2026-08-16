@@ -100,7 +100,7 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
   }
 
   // 6. Seed Roteiro Semanal and Paradas for Today
-  if (promotorRecord?.id && allStores && allStores.length > 0 && allIndustries && allIndustries.length > 0) {
+  if (promotorRecord?.id && allStores && allStores.length >= 3 && allIndustries && allIndustries.length >= 3) {
     const promotorId = promotorRecord.id;
     const startOfCurrentWeek = startOfWeek(new Date(), { weekStartsOn: 1 });
     const semanaRef = format(startOfCurrentWeek, "yyyy-MM-dd");
@@ -179,6 +179,8 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
       // 7. Complete the first parada with a visit
       if (createdParadas && createdParadas.length > 0) {
         const parada = createdParadas[0];
+        if (!parada) throw new Error("Parada is undefined");
+
         const now = new Date();
         const startTime = new Date(now.getTime() - 1000 * 60 * 45).toISOString();
         const endTime = now.toISOString();
