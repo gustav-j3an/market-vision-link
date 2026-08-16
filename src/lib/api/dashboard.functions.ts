@@ -105,17 +105,16 @@ export const getDashboardStats = createServerFn({ method: "GET" })
 
     // Ranking de produtos com mais ruptura
     const rupturaPorProduto: Record<string, { nome: string, count: number }> = {};
-    itensVisita
-      .filter(i => i.status === 'nao_encontrado' || i.status === 'ruptura')
-      .forEach(i => {
-        // Safe access to nested products table data
+    itensVisita.forEach(i => {
+      if (i.status === 'nao_encontrado' || i.status === 'ruptura') {
         const prodData = i.produtos as any;
         const nome = prodData?.nome || 'Desconhecido';
         if (!rupturaPorProduto[i.produto_id]) {
           rupturaPorProduto[i.produto_id] = { nome, count: 0 };
         }
         rupturaPorProduto[i.produto_id].count++;
-      });
+      }
+    });
     
     const rankingRuptura = Object.values(rupturaPorProduto)
       .sort((a, b) => b.count - a.count)
