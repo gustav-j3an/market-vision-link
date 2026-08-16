@@ -2,16 +2,15 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
-import { Roteiro } from '@/lib/api/roteiros';
 
 export function usePromotorRoteiros() {
   const { profile } = useAuth();
-  const [roteiros, setRoteiros] = useState<Roteiro[]>([]);
+  const [paradas, setParadas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    async function fetchRoteiros() {
+    async function fetchParadas() {
       if (!profile?.id) return;
 
       try {
@@ -26,15 +25,15 @@ export function usePromotorRoteiros() {
         if (promotorError) throw promotorError;
 
         if (!promotorData?.id) {
-          setRoteiros([]);
+          setParadas([]);
           return;
         }
 
         const today = new Date().toISOString().split('T')[0];
-        const promotorId = promotorData.id;
         
+        // Fetch from the new paradas_roteiro table
         const { data, error } = await supabase
-          .from('roteiros')
+          .from('paradas_roteiro')
           .select(`
             *,
             lojas (
@@ -43,28 +42,29 @@ export function usePromotorRoteiros() {
               rede,
               endereco,
               cidade
+            ),
+            industrias (
+              id,
+              nome,
+              marca
             )
           `)
-          .filter('promotor_id', 'eq', promotorId)
-          .filter('data_prevista', 'eq', today)
-          .order('horario_previsto', { ascending: true });
+          .eq('promotor_id', promotorData.id)
+          .eq('data', today)
+          .order('ordem', { ascending: true });
 
         if (error) throw error;
-        
-        setRoteiros((data || []).map(r => ({
-          ...r,
-          loja: (r as any).lojas
-        })) as unknown as Roteiro[]);
+        setParadas(data || []);
       } catch (err: any) {
-        console.error("Error fetching promotor roteiros:", err);
+        console.error("Error fetching promotor paradas:", err);
         setError(err);
       } finally {
         setLoading(false);
       }
     }
 
-    fetchRoteiros();
+    fetchParadas();
   }, [profile?.id]);
 
-  return { roteiros, loading, error };
+  return { roteiros: paradas, loading, error };
 }

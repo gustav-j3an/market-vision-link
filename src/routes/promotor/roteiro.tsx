@@ -90,21 +90,24 @@ function Roteiro() {
           </Card>
         )}
         
-        {roteiros.map((roteiro) => (
-          <Card key={roteiro.id} className={roteiro.status === 'concluido' ? "opacity-60" : ""}>
+        {roteiros.map((parada) => (
+          <Card key={parada.id} className={parada.status === 'concluida' ? "opacity-60" : ""}>
             <CardContent className="p-4 flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="bg-secondary p-3 rounded-full">
                   <MapPin size={20} className="text-primary" />
                 </div>
-                <div>
-                  <h3 className="font-semibold">{roteiro.loja?.nome}</h3>
+                <div className="flex-1">
+                  <h3 className="font-semibold">{parada.lojas?.nome}</h3>
                   <div className="flex flex-col gap-1 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2 font-medium text-primary/80">
+                      <Briefcase size={14} />
+                      {parada.industrias?.nome}
+                    </div>
                     <div className="flex items-center gap-2">
                       <Clock size={14} />
-                      {roteiro.horario_previsto || "Sem horário"}
+                      {parada.horario_previsto?.slice(0, 5) || "Sem horário"}
                     </div>
-                    <div>{format(new Date(roteiro.data_prevista), "dd/MM/yyyy", { locale: ptBR })}</div>
                   </div>
                 </div>
               </div>
