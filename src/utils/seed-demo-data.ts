@@ -69,7 +69,7 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
     const { data: existingRoteiros } = await supabase
       .from("roteiros")
       .select("loja_id")
-      .eq("promotor_id", promotorRecord.id as string)
+      .eq("promotor_id", promotorRecord.id)
       .eq("data_prevista", today);
       
     const existingStoreIds = existingRoteiros?.map(r => r.loja_id) || [];
@@ -77,7 +77,7 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
     const roteirosToInsert = allStores
       .filter(s => !existingStoreIds.includes(s.id))
       .map(store => ({
-        promotor_id: (promotorRecord as any).id,
+        promotor_id: promotorRecord.id,
         loja_id: store.id,
         data_prevista: today,
         horario_previsto: "09:00",

@@ -45,7 +45,7 @@ export function usePromotorRoteiros() {
               cidade
             )
           `)
-          .eq('promotor_id', promotorData.id as string)
+          .eq('promotor_id', promotorData.id)
           .eq('data_prevista', today)
           .order('horario_previsto', { ascending: true });
 
