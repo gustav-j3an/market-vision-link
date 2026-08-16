@@ -15,7 +15,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const { user, profile, isLoading } = useAuth();
+  const { user, profile, isLoading, profileError } = useAuth();
   const navigate = useNavigate();
 
   if (isLoading) {
@@ -27,11 +27,11 @@ function Index() {
   }
 
   // Se já estiver logado, redireciona conforme o perfil
-  if (user && profile) {
+  if (user && profile && !profileError) {
     if (profile.tipo === "gestor") {
-      return <Navigate to="/gestor/dashboard" />;
-    } else {
-      return <Navigate to="/promotor/roteiro" />;
+      return <Navigate to="/gestor/dashboard" replace />;
+    } else if (profile.tipo === "promotor") {
+      return <Navigate to="/promotor/roteiro" replace />;
     }
   }
 
