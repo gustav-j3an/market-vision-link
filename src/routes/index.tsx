@@ -1,12 +1,13 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Navigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Briefcase, UserCircle } from "lucide-react";
+import { Briefcase, UserCircle, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/")({
   component: Index,
   head: () => ({
-    title: "TradeVision | Login",
+    title: "TradeVision | Bem-vindo",
     meta: [
       { name: "description", content: "Bem-vindo ao TradeVision - SaaS de Trade Marketing" },
     ],
