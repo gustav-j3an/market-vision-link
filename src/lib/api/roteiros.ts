@@ -1,8 +1,52 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-export type RoteiroStatus = 'pendente' | 'em_andamento' | 'concluido' | 'cancelado';
+export type RoteiroStatus = 'pendente' | 'em_andamento' | 'concluido' | 'concluida' | 'cancelado';
 
+export interface RoteiroSemanal {
+  id: string;
+  promotor_id: string;
+  semana_referencia: string;
+  nome: string | null;
+  status: string;
+  empresa_id: string;
+  created_at: string;
+}
+
+export interface ParadaRoteiro {
+  id: string;
+  roteiro_semanal_id: string;
+  dia_semana: number;
+  data: string;
+  promotor_id: string;
+  loja_id: string;
+  industria_id: string;
+  horario_previsto: string | null;
+  ordem: number;
+  status: RoteiroStatus;
+  observacao: string | null;
+  loja?: {
+    id: string;
+    nome: string;
+    rede: string | null;
+    endereco: string | null;
+    cidade: string | null;
+    estado: string | null;
+  };
+  industria?: {
+    id: string;
+    nome: string;
+    marca: string | null;
+  };
+  promotor?: {
+    id: string;
+    perfil: {
+      nome: string;
+    }
+  };
+}
+
+// Keeping old interface for compatibility during migration
 export interface Roteiro {
   id: string;
   promotor_id: string;

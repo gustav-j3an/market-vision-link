@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Clock, ArrowRight, Loader2 } from "lucide-react";
+import { MapPin, Clock, ArrowRight, Loader2, Briefcase } from "lucide-react";
 import { usePromotorRoteiros } from "@/hooks/use-promotor-roteiros";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -90,46 +90,49 @@ function Roteiro() {
           </Card>
         )}
         
-        {roteiros.map((roteiro) => (
-          <Card key={roteiro.id} className={roteiro.status === 'concluido' ? "opacity-60" : ""}>
+        {roteiros.map((parada) => (
+          <Card key={parada.id} className={parada.status === 'concluida' ? "opacity-60" : ""}>
             <CardContent className="p-4 flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="bg-secondary p-3 rounded-full">
                   <MapPin size={20} className="text-primary" />
                 </div>
-                <div>
-                  <h3 className="font-semibold">{roteiro.loja?.nome}</h3>
+                <div className="flex-1">
+                  <h3 className="font-semibold">{parada.lojas?.nome}</h3>
                   <div className="flex flex-col gap-1 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2 font-medium text-primary/80">
+                      <Briefcase size={14} />
+                      {parada.industrias?.nome}
+                    </div>
                     <div className="flex items-center gap-2">
                       <Clock size={14} />
-                      {roteiro.horario_previsto || "Sem horário"}
+                      {parada.horario_previsto?.slice(0, 5) || "Sem horário"}
                     </div>
-                    <div>{format(new Date(roteiro.data_prevista), "dd/MM/yyyy", { locale: ptBR })}</div>
                   </div>
                 </div>
               </div>
               <Button 
                 size="sm" 
-                variant={roteiro.status === 'concluido' ? "outline" : "default"}
-                disabled={loadingAction === roteiro.id}
+                variant={parada.status === 'concluida' ? "outline" : "default"}
+                disabled={loadingAction === parada.id}
                 onClick={() => {
-                  if (roteiro.status === 'concluido' || roteiro.status === 'em_andamento') {
-                    navigate({ to: `/promotor/visita/${roteiro.id}` as any });
+                  if (parada.status === 'concluida' || parada.status === 'em_andamento') {
+                    navigate({ to: `/promotor/visita/${parada.id}` as any });
                   } else {
-                    handleStartVisita(roteiro);
+                    handleStartVisita(parada);
                   }
                 }}
               >
-                {loadingAction === roteiro.id ? (
+                {loadingAction === parada.id ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : roteiro.status === 'concluido' ? (
+                ) : parada.status === 'concluida' ? (
                   "Ver Resumo"
-                ) : roteiro.status === 'em_andamento' ? (
+                ) : parada.status === 'em_andamento' ? (
                   "Continuar"
                 ) : (
                   "Iniciar"
                 )}
-                {loadingAction !== roteiro.id && <ArrowRight className="ml-2" size={14} />}
+                {loadingAction !== parada.id && <ArrowRight className="ml-2" size={14} />}
               </Button>
 
             </CardContent>

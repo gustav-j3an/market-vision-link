@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { startOfWeek, format } from "date-fns";
 
 export async function seedDemoData(empresaId: string, gestorProfileId: string) {
   // 1. Get or Create a Demo Promoter Profile
@@ -20,12 +21,36 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
     }
   }
 
-  // 2. Seed Products (Avoid duplicates by SKU)
+  // 2. Seed Industries
+  const industriesList = [
+    { nome: "Ambev", marca: "Ambev", categoria: "Bebidas", empresa_id: empresaId, status: 'ativo' },
+    { nome: "Coca-Cola", marca: "Coca-Cola", categoria: "Bebidas", empresa_id: empresaId, status: 'ativo' },
+    { nome: "Nestlé", marca: "Nestlé", categoria: "Alimentos", empresa_id: empresaId, status: 'ativo' },
+  ];
+
+  const { data: existingIndustries } = await supabase.from("industrias").select("id, nome").eq("empresa_id", empresaId);
+  const industriesToInsert = industriesList.filter(ind => !existingIndustries?.some(ei => ei.nome === ind.nome));
+
+  if (industriesToInsert.length > 0) {
+    const { error: indError } = await supabase.from("industrias").insert(industriesToInsert);
+    if (indError) throw indError;
+  }
+
+  const { data: allIndustries } = await supabase.from("industrias").select("id, nome").eq("empresa_id", empresaId);
+  const ambev = allIndustries?.find(i => i.nome === "Ambev");
+  const coca = allIndustries?.find(i => i.nome === "Coca-Cola");
+  const nestle = allIndustries?.find(i => i.nome === "Nestlé");
+
+  if (!ambev || !coca || !nestle) throw new Error("Industries not created");
+
+  // 3. Seed Products linked to industries
   const productsList = [
-    { nome: "Suco RefrescaCo Laranja 1L", marca: "RefrescaCo", categoria: "Bebidas", sku: "SUC-001", empresa_id: empresaId },
-    { nome: "Cerveja Artesanal Br 600ml", marca: "Cervejaria BR", categoria: "Bebidas", sku: "CER-001", empresa_id: empresaId },
-    { nome: "Água Pura 500ml", marca: "Água Pura", categoria: "Bebidas", sku: "AGU-001", empresa_id: empresaId },
-    { nome: "Refrigerante Cola 2L", marca: "RefrescaCo", categoria: "Bebidas", sku: "REF-001", empresa_id: empresaId },
+    { nome: "Cerveja Brahma 600ml", marca: "Brahma", categoria: "Cervejas", sku: "BRA-600", industria_id: ambev.id, empresa_id: empresaId },
+    { nome: "Cerveja Skol 600ml", marca: "Skol", categoria: "Cervejas", sku: "SKO-600", industria_id: ambev.id, empresa_id: empresaId },
+    { nome: "Coca-Cola 2L", marca: "Coca-Cola", categoria: "Refrigerantes", sku: "COC-2L", industria_id: coca.id, empresa_id: empresaId },
+    { nome: "Fanta Laranja 2L", marca: "Fanta", categoria: "Refrigerantes", sku: "FAN-2L", industria_id: coca.id, empresa_id: empresaId },
+    { nome: "Nescau 400g", marca: "Nestlé", categoria: "Achocolatados", sku: "NES-400", industria_id: nestle.id, empresa_id: empresaId },
+    { nome: "Leite Ninho 1kg", marca: "Ninho", categoria: "Leites", sku: "NIN-1KG", industria_id: nestle.id, empresa_id: empresaId },
   ];
   
   const productSkus = productsList.map(p => p.sku).filter(Boolean) as string[];
@@ -39,17 +64,16 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
     if (productsError) throw productsError;
   }
 
-  const { data: allProducts } = await supabase.from("produtos").select("id, nome").eq("empresa_id", empresaId);
+  const { data: allProducts } = await supabase.from("produtos").select("id, nome, industria_id").eq("empresa_id", empresaId);
 
-  // 3. Seed Stores (Avoid duplicates by Name+Rede)
+  // 4. Seed Stores
   const storesList = [
-    { nome: "Pão de Açúcar", rede: "GPA", endereco: "Av. Paulista, 1000", cidade: "São Paulo", estado: "SP", empresa_id: empresaId },
-    { nome: "Carrefour", rede: "Carrefour", endereco: "Rua Brooklin, 500", cidade: "São Paulo", estado: "SP", empresa_id: empresaId },
-    { nome: "Extra", rede: "GPA", endereco: "Av. Brigadeiro, 2000", cidade: "São Paulo", estado: "SP", empresa_id: empresaId },
+    { nome: "Pão de Açúcar - Jardins", rede: "GPA", endereco: "Av. Paulista, 1000", cidade: "São Paulo", estado: "SP", empresa_id: empresaId },
+    { nome: "Carrefour - Brooklin", rede: "Carrefour", endereco: "Rua Brooklin, 500", cidade: "São Paulo", estado: "SP", empresa_id: empresaId },
+    { nome: "Extra - Itaim", rede: "GPA", endereco: "Av. Brigadeiro, 2000", cidade: "São Paulo", estado: "SP", empresa_id: empresaId },
   ];
   
   const { data: existingStores } = await supabase.from("lojas").select("id, nome, rede").eq("empresa_id", empresaId);
-  
   const storesToInsert = storesList.filter(s => !existingStores?.some(es => es.nome === s.nome && es.rede === s.rede));
 
   if (storesToInsert.length > 0) {
@@ -59,105 +83,153 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
 
   const { data: allStores } = await supabase.from("lojas").select("id, nome").eq("empresa_id", empresaId);
 
-  // 4. Seed Promoter Record
-  const { data: promotorRecord, error: promotorError } = await supabase
+  // 5. Seed Promoter and Industry Link
+  const { data: promotorRecord } = await supabase
     .from("promotores")
-    .upsert({ perfil_id: targetProfileId, empresa_id: empresaId, regiao: "Centro-Sul" }, { onConflict: 'perfil_id' })
+    .upsert({ perfil_id: targetProfileId, empresa_id: empresaId, regiao: "São Paulo Capital" }, { onConflict: 'perfil_id' })
     .select()
     .single();
   
-  if (promotorError) throw promotorError;
+  if (promotorRecord && allIndustries) {
+    const promoterIndustries = allIndustries.map(ind => ({
+      promotor_id: promotorRecord.id,
+      industria_id: ind.id,
+      status: 'ativo'
+    }));
+    await supabase.from("promotores_industrias").upsert(promoterIndustries, { onConflict: 'promotor_id,industria_id' });
+  }
 
-  // 5. Seed Roteiros and a Finished Visit for Today
-  if (promotorRecord?.id && allStores && allStores.length > 0 && allProducts && allProducts.length > 0) {
-    const today = new Date().toISOString().split('T')[0]!;
+  // 6. Seed Roteiro Semanal and Paradas for Today
+  if (promotorRecord?.id && allStores && allStores.length >= 3 && allIndustries && allIndustries.length >= 3) {
     const promotorId = promotorRecord.id;
-    
-    const { data: existingRoteiros } = await supabase
-      .from("roteiros")
-      .select("id, loja_id, status")
-      .eq('promotor_id', promotorId)
-      .eq('data_prevista', today);
-      
-    const existingStoreIds = existingRoteiros?.map(r => r.loja_id) || [];
+    const startOfCurrentWeek = startOfWeek(new Date(), { weekStartsOn: 1 });
+    const semanaRef = format(startOfCurrentWeek, "yyyy-MM-dd");
 
-    const storesNeedingRoteiro = allStores.filter(s => s.id && !existingStoreIds.includes(s.id));
-    
-    if (storesNeedingRoteiro.length > 0) {
-      const roteirosToInsert = storesNeedingRoteiro.map((store, index) => ({
+    // 6.1 Roteiro Semanal
+    const { data: roteiroSemanal, error: rsError } = await supabase
+      .from("roteiros_semanais")
+      .upsert({
         promotor_id: promotorId,
-        loja_id: store.id,
-        data_prevista: today,
-        horario_previsto: index === 0 ? "08:00" : index === 1 ? "10:30" : "14:00",
-        status: 'pendente' as any,
-        empresa_id: empresaId
-      }));
+        empresa_id: empresaId,
+        semana_referencia: semanaRef,
+        status: 'publicado'
+      }, { onConflict: 'promotor_id,semana_referencia' })
+      .select()
+      .single();
 
-      const { data: createdRoteiros, error: roteirosError } = await supabase
-        .from("roteiros")
-        .insert(roteirosToInsert as any)
+    if (rsError) throw rsError;
+    if (!roteiroSemanal) throw new Error("Roteiro semanal not found");
+
+    // 6.2 Paradas for Today
+    const today = new Date();
+    const todayStr = format(today, "yyyy-MM-dd");
+    const dayOfWeek = today.getDay() === 0 ? 6 : today.getDay(); // Monday=1, Sunday=0 -> 6 (Sat as fallback)
+
+    const { data: existingParadas } = await supabase
+      .from("paradas_roteiro")
+      .select("id")
+      .eq('roteiro_semanal_id', roteiroSemanal.id)
+      .eq('data', todayStr);
+
+    if (!existingParadas || existingParadas.length === 0) {
+      // Create 3 stops for today with different industries
+      const paradasToInsert = [
+        {
+          roteiro_semanal_id: roteiroSemanal.id,
+          promotor_id: promotorId,
+          loja_id: allStores[0]?.id || '',
+          industria_id: ambev.id,
+          dia_semana: dayOfWeek,
+          data: todayStr,
+          horario_previsto: "08:00:00",
+          ordem: 1,
+          status: 'pendente'
+        },
+        {
+          roteiro_semanal_id: roteiroSemanal.id,
+          promotor_id: promotorId,
+          loja_id: allStores[1]?.id || '',
+          industria_id: coca.id,
+          dia_semana: dayOfWeek,
+          data: todayStr,
+          horario_previsto: "10:30:00",
+          ordem: 2,
+          status: 'pendente'
+        },
+        {
+          roteiro_semanal_id: roteiroSemanal.id,
+          promotor_id: promotorId,
+          loja_id: allStores[2]?.id || '',
+          industria_id: nestle.id,
+          dia_semana: dayOfWeek,
+          data: todayStr,
+          horario_previsto: "14:00:00",
+          ordem: 3,
+          status: 'pendente'
+        }
+      ];
+
+      const { data: createdParadas, error: paradasError } = await supabase
+        .from("paradas_roteiro")
+        .insert(paradasToInsert)
         .select();
-        
-      if (roteirosError) throw roteirosError;
 
-      if (createdRoteiros && createdRoteiros.length > 0) {
-        const roteiroToComplete = createdRoteiros[0];
-        if (!roteiroToComplete) return true;
-        
-        // 1. Create Visit
+      if (paradasError) throw paradasError;
+
+      // 7. Complete the first parada with a visit
+      if (createdParadas && createdParadas.length > 0) {
+        const parada = createdParadas[0];
+        if (!parada) throw new Error("Parada is undefined");
+
         const now = new Date();
-        const startTime = new Date(now.getTime() - 1000 * 60 * 45).toISOString(); // 45 mins ago
+        const startTime = new Date(now.getTime() - 1000 * 60 * 45).toISOString();
         const endTime = now.toISOString();
 
         const { data: visit, error: visitError } = await supabase
           .from("visitas")
           .insert({
-            roteiro_id: roteiroToComplete.id,
+            parada_id: parada.id,
             promotor_id: promotorId,
-            loja_id: roteiroToComplete.loja_id,
+            loja_id: parada.loja_id,
+            industria_id: parada.industria_id,
             inicio: startTime,
             fim: endTime,
-            status: 'concluido' as any,
-            nota_execucao: 85,
-            observacoes: "Gôndola organizada, porém identificada ruptura no SKU de Refrigerante Cola 2L. Reposição solicitada ao gerente da loja.",
+            status: 'concluida',
+            nota_execucao: 90,
+            observacoes: "Execução Ambev realizada com sucesso. Ruptura identificada no SKU Brahma 600ml.",
             empresa_id: empresaId
           } as any)
           .select()
           .single();
 
         if (visitError) throw visitError;
-        if (!visit) return true;
+        if (!visit) throw new Error("Visit not created");
 
-        // 2. Create Visit Items
-        const visitItems = allProducts.map(p => ({
+        // 8. Visit Items (only for the industry of the parada)
+        const industryProducts = (allProducts || []).filter(p => p.industria_id === parada.industria_id);
+        const visitItems = industryProducts.map(p => ({
           visita_id: visit.id,
           produto_id: p.id,
-          status: (p.nome?.includes("Cola") ? 'ruptura' : 'em_estoque') as any,
-          preco: p.nome?.includes("Suco") ? 8.90 : p.nome?.includes("Cerveja") ? 12.50 : 5.50
+          status: (p.nome?.includes("Brahma") ? 'ruptura' : 'em_estoque') as any,
+          preco: 9.90
         }));
 
-        const { error: itemsError } = await supabase.from("itens_visita").insert(visitItems as any);
-        if (itemsError) throw itemsError;
+        if (visitItems.length > 0) {
+          await supabase.from("itens_visita").insert(visitItems as any);
+        }
 
-        // 3. Create Visit Photos (using mock URLs from Unsplash)
+        // 9. Photos
         const visitPhotos = [
           {
             visita_id: visit.id,
             caminho_arquivo: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=800",
-            legenda: "Gôndola de Bebidas - Início da Visita"
-          },
-          {
-            visita_id: visit.id,
-            caminho_arquivo: "https://images.unsplash.com/photo-1604719312566-8912e9227c6a?auto=format&fit=crop&q=80&w=800",
-            legenda: "Exposição Frontal - Sucos"
+            legenda: "Check-in realizado"
           }
         ];
+        await supabase.from("fotos_visita").insert(visitPhotos as any);
 
-        const { error: photosError } = await supabase.from("fotos_visita").insert(visitPhotos as any);
-        if (photosError) throw photosError;
-
-        // 4. Update Roteiro status
-        await supabase.from("roteiros").update({ status: 'concluido' }).eq('id', roteiroToComplete.id);
+        // 10. Update Parada status
+        await supabase.from("paradas_roteiro").update({ status: 'concluida' }).eq('id', parada.id);
       }
     }
   }

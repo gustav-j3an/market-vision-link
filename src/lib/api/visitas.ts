@@ -67,17 +67,31 @@ export async function saveVisita(visita: any, itens: any[], fotos: File[], empre
     await uploadVisitaFoto(visitaData.id, foto, empresaId);
   }
 
-  // 4. Update roteiro status if finished
-  if (visita.fim && visita.roteiro_id) {
-    await supabase
-      .from('roteiros')
-      .update({ status: 'concluido' })
-      .eq('id', visita.roteiro_id);
-  } else if (visita.roteiro_id) {
-    await supabase
-      .from('roteiros')
-      .update({ status: 'em_andamento' })
-      .eq('id', visita.roteiro_id);
+  // 4. Update status if finished
+  if (visita.fim) {
+    if (visita.parada_id) {
+      await supabase
+        .from('paradas_roteiro')
+        .update({ status: 'concluida' })
+        .eq('id', visita.parada_id);
+    } else if (visita.roteiro_id) {
+      await supabase
+        .from('roteiros')
+        .update({ status: 'concluido' })
+        .eq('id', visita.roteiro_id);
+    }
+  } else {
+    if (visita.parada_id) {
+      await supabase
+        .from('paradas_roteiro')
+        .update({ status: 'em_andamento' })
+        .eq('id', visita.parada_id);
+    } else if (visita.roteiro_id) {
+      await supabase
+        .from('roteiros')
+        .update({ status: 'em_andamento' })
+        .eq('id', visita.roteiro_id);
+    }
   }
 
   return visitaData;

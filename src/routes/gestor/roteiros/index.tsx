@@ -1,19 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Trash2, Edit } from "lucide-react";
-import { getRoteiros, deleteRoteiro, Roteiro } from "@/lib/api/roteiros";
+import { Plus, Search, Trash2, Calendar, ChevronRight } from "lucide-react";
+import { getRoteirosSemanais } from "@/lib/api/roteiros.semanais";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { format, startOfWeek, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { RoteiroForm } from "@/components/gestor/RoteiroForm";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/gestor/roteiros/")({
   component: RoteirosPage,
@@ -21,17 +20,16 @@ export const Route = createFileRoute("/gestor/roteiros/")({
 
 function RoteirosPage() {
   const { profile } = useAuth();
-  const [roteiros, setRoteiros] = useState<Roteiro[]>([]);
+  const navigate = useNavigate();
+  const [roteiros, setRoteiros] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingRoteiro, setEditingRoteiro] = useState<Roteiro | null>(null);
 
   const fetchRoteiros = async () => {
     if (!profile?.empresa_id) return;
     try {
       setLoading(true);
-      const data = await getRoteiros(profile.empresa_id);
+      const data = await getRoteirosSemanais(profile.empresa_id);
       setRoteiros(data);
     } catch (error) {
       console.error("Erro ao carregar roteiros:", error);
@@ -45,33 +43,18 @@ function RoteirosPage() {
     fetchRoteiros();
   }, [profile?.empresa_id]);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Tem certeza que deseja excluir este roteiro?")) return;
-    try {
-      await deleteRoteiro(id);
-      toast.success("Roteiro excluído com sucesso");
-      fetchRoteiros();
-    } catch (error) {
-      toast.error("Erro ao excluir roteiro");
-    }
-  };
-
   const filteredRoteiros = roteiros.filter(r => 
-    r.promotor?.perfil?.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    r.loja?.nome.toLowerCase().includes(searchTerm.toLowerCase())
+    r.promotores?.perfil?.nome.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="space-y-6">
       <PageHeader 
-        title="Roteiros" 
-        description="Planeje e acompanhe as visitas dos promotores."
+        title="Planejamento Semanal" 
+        description="Gerencie as rotas e paradas semanais da sua equipe de campo."
         actions={
-          <Button onClick={() => {
-            setEditingRoteiro(null);
-            setIsFormOpen(true);
-          }}>
-            <Plus className="mr-2 h-4 w-4" /> Novo Roteiro
+          <Button onClick={() => navigate({ to: "/gestor/roteiros/novo" as any })}>
+            <Plus className="mr-2 h-4 w-4" /> Novo Planejamento
           </Button>
         }
       />
@@ -80,7 +63,7 @@ function RoteirosPage() {
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
-            placeholder="Buscar por promotor ou loja..."
+            placeholder="Buscar por promotor..."
             className="pl-9"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -92,10 +75,8 @@ function RoteirosPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Data</TableHead>
+              <TableHead>Semana</TableHead>
               <TableHead>Promotor</TableHead>
-              <TableHead>Loja</TableHead>
-              <TableHead>Horário</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
@@ -103,62 +84,54 @@ function RoteirosPage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
                   Carregando roteiros...
                 </TableCell>
               </TableRow>
             ) : filteredRoteiros.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                  Nenhum roteiro encontrado.
+                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                  Nenhum planejamento semanal encontrado.
                 </TableCell>
               </TableRow>
             ) : (
-              filteredRoteiros.map((roteiro) => (
-                <TableRow key={roteiro.id}>
-                  <TableCell>
-                    {format(new Date(roteiro.data_prevista), "dd/MM/yyyy", { locale: ptBR })}
-                  </TableCell>
-                  <TableCell className="font-medium">{roteiro.promotor?.perfil?.nome}</TableCell>
-                  <TableCell>{roteiro.loja?.nome}</TableCell>
-                  <TableCell>{roteiro.horario_previsto || "--:--"}</TableCell>
-                  <TableCell>
-                    <span className={cn(
-                      "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize",
-                      roteiro.status === 'concluido' ? "bg-green-100 text-green-800" :
-                      roteiro.status === 'em_andamento' ? "bg-blue-100 text-blue-800" :
-                      "bg-yellow-100 text-yellow-800"
-                    )}>
-                      {roteiro.status}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="icon" onClick={() => {
-                        setEditingRoteiro(roteiro);
-                        setIsFormOpen(true);
-                      }}>
-                        <Edit className="h-4 w-4" />
+              filteredRoteiros.map((roteiro) => {
+                const start = startOfWeek(new Date(roteiro.semana_referencia), { weekStartsOn: 1 });
+                const end = addDays(start, 5);
+                return (
+                  <TableRow key={roteiro.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate({ to: `/gestor/roteiros/${roteiro.id}` as any })}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span>
+                          {format(start, "dd/MM")} - {format(end, "dd/MM/yyyy")}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-medium">{roteiro.promotores?.perfil?.nome}</TableCell>
+                    <TableCell>
+                      <span className={cn(
+                        "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize",
+                        roteiro.status === 'publicado' ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
+                      )}>
+                        {roteiro.status}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="sm">
+                        Ver Detalhes <ChevronRight className="ml-2 h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(roteiro.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>
       </Card>
-      <RoteiroForm 
-        open={isFormOpen} 
-        onOpenChange={setIsFormOpen} 
-        onSuccess={fetchRoteiros}
-        roteiro={editingRoteiro}
-      />
     </div>
   );
 }
+
 
 

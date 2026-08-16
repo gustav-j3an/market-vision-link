@@ -8,10 +8,11 @@ export const getDashboardStats = createServerFn({ method: "GET" })
     return {
       empresaId: data.empresaId as string,
       period: (data.period as 'day' | 'week' | 'month') || 'day',
+      industriaId: data.industriaId as string | undefined,
     };
   })
   .handler(async ({ data }) => {
-    const { empresaId, period } = data;
+    const { empresaId, period, industriaId } = data;
     const now = new Date();
     let startDate: Date;
 
@@ -28,23 +29,27 @@ export const getDashboardStats = createServerFn({ method: "GET" })
     const startDateStr = format(startDate, 'yyyy-MM-dd');
     const todayStr = format(now, 'yyyy-MM-dd');
 
-    // 1. Visitas stats
-    const { data: totalRoteiros } = await supabase
-      .from('roteiros')
-      .select('id', { count: 'exact' })
-      .eq('empresa_id', empresaId)
-      .gte('data_prevista', startDateStr)
-      .lte('data_prevista', todayStr);
+    // Better query: paradas_roteiro has no company_id directly, but we can filter by industrias.empresa_id or roteiros_semanais.empresa_id
+    // But since RLS is active, we can just query directly for now if we know the RLS allows it.
+    // For counting planned stops:
+    let plannedQuery = supabase.from('paradas_roteiro').select('id', { count: 'exact' }).gte('data', startDateStr).lte('data', todayStr);
+    if (industriaId) plannedQuery = plannedQuery.eq('industria_id', industriaId);
+    const { count: totalParadas } = await plannedQuery;
 
-    const { data: visitasConcluidas } = await supabase
+    // 2. Completed visits
+    let visitsQuery = supabase
       .from('visitas')
-      .select('id, nota_execucao, loja_id, promotor_id, inicio', { count: 'exact' })
+      .select('id, nota_execucao, loja_id, promotor_id, inicio, industria_id', { count: 'exact' })
       .eq('empresa_id', empresaId)
-      .eq('status', 'concluido')
+      .in('status', ['concluido', 'concluida'])
       .gte('inicio', startIso)
       .lte('inicio', endIso);
 
-    // 2. Ruptura stats
+    if (industriaId) visitsQuery = visitsQuery.eq('industria_id', industriaId);
+    
+    const { data: visitasConcluidas } = await visitsQuery;
+
+    // 3. Ruptura stats
     const vIds = (visitasConcluidas || []).map(v => v.id);
     let taxaRuptura = 0;
     let rupturasCount = 0;
@@ -62,37 +67,36 @@ export const getDashboardStats = createServerFn({ method: "GET" })
       taxaRuptura = totalItens > 0 ? (rupturasCount / totalItens) * 100 : 0;
     }
 
-    // 3. Execução média
+    // 4. Execução média
     const notas = visitasConcluidas?.filter(v => v.nota_execucao !== null).map(v => v.nota_execucao as number) || [];
     const execucaoMedia = notas.length > 0 ? notas.reduce((a, b) => a + b, 0) / notas.length : 0;
 
-    // 4. Lojas visitadas (unique)
+    // 5. Lojas visitadas (unique)
     const lojasVisitadas = new Set(visitasConcluidas?.map(v => v.loja_id)).size;
 
-    // 5. Promotores ativos
+    // 6. Promotores ativos
     const promotoresAtivos = new Set(visitasConcluidas?.map(v => v.promotor_id)).size;
 
-    // 6. Alertas
-    const { data: roteirosHoje } = await supabase
-      .from('roteiros')
+    // 7. Alertas for today
+    let paradasHojeQuery = supabase
+      .from('paradas_roteiro')
       .select('*, lojas(nome)')
-      .eq('empresa_id', empresaId)
-      .eq('data_prevista', todayStr);
+      .eq('data', todayStr);
+    
+    if (industriaId) paradasHojeQuery = paradasHojeQuery.eq('industria_id', industriaId);
+    const { data: paradasHoje } = await paradasHojeQuery;
 
     const alertas = [];
-    
-    // Alerta de roteiros pendentes
-    const pendentes = roteirosHoje?.filter(r => r.status === 'pendente') || [];
+    const pendentes = paradasHoje?.filter(r => r.status === 'pendente') || [];
     if (pendentes.length > 0) {
       alertas.push({
         type: 'roteiro_atrasado',
-        title: `${pendentes.length} Roteiros Pendentes`,
-        description: 'Existem roteiros para hoje que ainda não foram iniciados.',
+        title: `${pendentes.length} Paradas Pendentes`,
+        description: 'Existem visitas agendadas para hoje que ainda não foram iniciadas.',
         severity: 'warning'
       });
     }
 
-    // Alerta de baixa execução
     const baixaExecucao = visitasConcluidas?.filter(v => v.nota_execucao !== null && v.nota_execucao! < 70) || [];
     if (baixaExecucao.length > 0) {
       alertas.push({
@@ -103,7 +107,7 @@ export const getDashboardStats = createServerFn({ method: "GET" })
       });
     }
 
-    // Ranking de produtos com mais ruptura
+    // 8. Ranking
     const rupturaPorProduto: Record<string, { nome: string, count: number }> = {};
     itensVisita.forEach(i => {
       if (i.status === 'nao_encontrado' || i.status === 'ruptura') {
@@ -121,7 +125,7 @@ export const getDashboardStats = createServerFn({ method: "GET" })
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
 
-    // Gráfico de evolução diária (últimos 7 dias)
+    // 9. Evolution
     const evolucaoVisitas: Record<string, number> = {};
     for (let i = 6; i >= 0; i--) {
       const d = format(subDays(now, i), 'dd/MM');
@@ -138,7 +142,7 @@ export const getDashboardStats = createServerFn({ method: "GET" })
     return {
       stats: {
         visitasRealizadas: visitasConcluidas?.length || 0,
-        visitasPlanejadas: totalRoteiros?.length || 0,
+        visitasPlanejadas: totalParadas || 0,
         taxaRuptura: taxaRuptura.toFixed(1) + '%',
         execucaoMedia: execucaoMedia.toFixed(1) + '%',
         lojasVisitadas,
