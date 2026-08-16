@@ -24,7 +24,7 @@ function Index() {
       </div>
 
       <div className="grid w-full max-w-2xl gap-6 md:grid-cols-2">
-        <Card className="hover:border-primary transition-all cursor-pointer group" onClick={() => navigate({ to: "/gestor/dashboard" })}>
+        <Card className="hover:border-primary transition-all cursor-pointer group" onClick={() => navigate({ to: "/gestor/dashboard" as any })}>
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
               <Briefcase size={32} />
@@ -37,7 +37,7 @@ function Index() {
           </CardContent>
         </Card>
 
-        <Card className="hover:border-primary transition-all cursor-pointer group" onClick={() => navigate({ to: "/promotor/roteiro" })}>
+        <Card className="hover:border-primary transition-all cursor-pointer group" onClick={() => navigate({ to: "/promotor/roteiro" as any })}>
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
               <UserCircle size={32} />
