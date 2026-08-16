@@ -29,15 +29,6 @@ export const getDashboardStats = createServerFn({ method: "GET" })
     const startDateStr = format(startDate, 'yyyy-MM-dd');
     const todayStr = format(now, 'yyyy-MM-dd');
 
-    // 1. Visitas stats from new table paradas_roteiro
-    let paradasQuery = supabase
-      .from('paradas_roteiro')
-      .select('id', { count: 'exact' })
-      .eq('roteiro_semanal:roteiros_semanais(empresa_id)', empresaId) // Filter via join or simple eq if empresa_id was there
-      // However, roteiros_semanais has empresa_id. Let's assume we can filter or just use all.
-      .gte('data', startDateStr)
-      .lte('data', todayStr);
-    
     // Better query: paradas_roteiro has no company_id directly, but we can filter by industrias.empresa_id or roteiros_semanais.empresa_id
     // But since RLS is active, we can just query directly for now if we know the RLS allows it.
     // For counting planned stops:
