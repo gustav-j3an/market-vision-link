@@ -25,15 +25,11 @@ function SignupComponent() {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    e.stopPropagation();
-    
     if (isLoading) return;
     
     setIsLoading(true);
-    console.log("Iniciando signup para:", formData.email);
 
     try {
-      // 1. Sign up user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -46,10 +42,7 @@ function SignupComponent() {
 
       if (authError) throw authError;
       if (!authData.user) throw new Error("Erro ao criar usuário");
-      
-      console.log("Usuário criado no Auth:", authData.user.id);
 
-      // 2. Create profile
       const { error: profileError } = await supabase
         .from("profiles")
         .upsert({
@@ -60,20 +53,11 @@ function SignupComponent() {
           tipo: formData.role,
         });
 
-      if (profileError) {
-        console.error("Erro ao criar perfil:", profileError);
-        throw profileError;
-      }
+      if (profileError) throw profileError;
 
-      console.log("Perfil criado com sucesso. Redirecionando para login...");
       toast.success("Cadastro realizado com sucesso! Prossiga para configurar sua conta.");
-      
-      // Delay navigation slightly to ensure toast and state are handled
-      setTimeout(() => {
-        navigate({ to: "/auth/login" as any });
-      }, 100);
+      navigate({ to: "/auth/login" as any });
     } catch (error: any) {
-      console.error("Erro no processo de signup:", error);
       toast.error(error.message || "Erro ao realizar cadastro");
       setIsLoading(false);
     }
@@ -86,11 +70,8 @@ function SignupComponent() {
           <CardTitle className="text-2xl font-bold text-primary">TradeVision</CardTitle>
           <CardDescription>Crie sua conta para começar.</CardDescription>
         </CardHeader>
-        <form onSubmit={(e) => {
-          console.log("Form onSubmit event triggered");
-          handleSignup(e);
-        }}>
-          <CardContent className="space-y-4">
+        <CardContent>
+          <form className="space-y-4" onSubmit={handleSignup}>
             <div className="space-y-2">
               <Label htmlFor="name">Nome Completo</Label>
               <Input 
@@ -136,20 +117,20 @@ function SignupComponent() {
                 </SelectContent>
               </Select>
             </div>
-          </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
             <Button type="submit" className="w-full h-12" disabled={isLoading}>
               {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowRight className="mr-2 h-4 w-4" />}
               Criar conta e Continuar
             </Button>
-            <div className="text-center text-sm text-muted-foreground">
-              Já tem uma conta?{" "}
-              <Link to="/auth/login" className="text-primary hover:underline">
-                Entrar
-              </Link>
-            </div>
-          </CardFooter>
-        </form>
+          </form>
+        </CardContent>
+        <CardFooter className="flex flex-col space-y-4">
+          <div className="text-center text-sm text-muted-foreground">
+            Já tem uma conta?{" "}
+            <Link to="/auth/login" className="text-primary hover:underline">
+              Entrar
+            </Link>
+          </div>
+        </CardFooter>
       </Card>
     </div>
   );
