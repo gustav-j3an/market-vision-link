@@ -225,24 +225,30 @@ function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Informação Incial */}
-        {stats?.stats?.visitasPlanejadas === 0 && !isSeeding && (
+        {/* Informação Incial / Empty State */}
+        {((stats?.stats?.visitasPlanejadas === 0) || (stats?.stats?.visitasRealizadas === 0 && stats?.stats?.visitasPlanejadas > 0)) && !isSeeding && (
           <Card className="bg-blue-50 border-blue-100 flex flex-col justify-center">
             <CardContent className="p-8 text-center">
               <div className="bg-blue-100 p-4 rounded-full text-blue-700 w-fit mx-auto mb-4">
                 <Database size={32} />
               </div>
-              <h3 className="text-lg font-bold text-blue-900 mb-2">Primeiros Passos</h3>
+              <h3 className="text-lg font-bold text-blue-900 mb-2">
+                {stats?.stats?.visitasPlanejadas === 0 ? "Primeiros Passos" : "Aguardando Visitas"}
+              </h3>
               <p className="text-sm text-blue-700 max-w-sm mx-auto">
-                Não identificamos roteiros planejados. Cadastre roteiros para seus promotores ou use os dados de demonstração para explorar os recursos analíticos.
+                {stats?.stats?.visitasPlanejadas === 0 
+                  ? "Não identificamos roteiros planejados. Cadastre roteiros para seus promotores ou use os dados de demonstração para explorar os recursos analíticos."
+                  : "Os roteiros foram criados, mas nenhuma visita foi finalizada hoje. Acompanhe o progresso da equipe em tempo real assim que os promotores iniciarem as atividades."}
               </p>
-              <Button 
-                onClick={() => toast.info("Navegue até a aba 'Roteiros' para cadastrar.")} 
-                variant="link" 
-                className="mt-4 text-blue-700 underline"
-              >
-                Como criar roteiros?
-              </Button>
+              {stats?.stats?.visitasPlanejadas === 0 && (
+                <Button 
+                  onClick={() => toast.info("Navegue até a aba 'Roteiros' para cadastrar.")} 
+                  variant="link" 
+                  className="mt-4 text-blue-700 underline"
+                >
+                  Como criar roteiros?
+                </Button>
+              )}
             </CardContent>
           </Card>
         )}
