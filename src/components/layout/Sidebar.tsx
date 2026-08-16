@@ -11,7 +11,8 @@ import {
   Settings,
   Route as RouteIcon,
   LogOut,
-  User
+  User,
+  Briefcase
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -50,6 +51,7 @@ export function Sidebar({ type = "gestor" }: { type?: "gestor" | "promotor" }) {
   
   const gestorItems = [
     { icon: LayoutDashboard, label: "Visão Geral", href: "/gestor/dashboard" },
+    { icon: Briefcase, label: "Indústrias", href: "/gestor/industrias" },
     { icon: RouteIcon, label: "Roteiros", href: "/gestor/roteiros" },
     { icon: MapPin, label: "Lojas", href: "/gestor/lojas" },
     { icon: Package, label: "Produtos", href: "/gestor/produtos" },
