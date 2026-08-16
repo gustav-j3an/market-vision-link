@@ -7,14 +7,14 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, Building2, UserCircle2 } from "lucide-react";
+import { Loader2, Building2, UserCircle2, LogOut } from "lucide-react";
 
 export const Route = createFileRoute("/onboarding")({
   component: OnboardingComponent,
 });
 
 function OnboardingComponent() {
-  const { user, profile, isLoading, profileError, refreshProfile } = useAuth();
+  const { user, profile, isLoading, profileError, refreshProfile, signOut } = useAuth();
   const [companyName, setCompanyName] = useState("");
   const [gestorName, setGestorName] = useState(profile?.nome || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -100,7 +100,13 @@ function OnboardingComponent() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
+      <div className="absolute top-4 right-4">
+        <Button variant="ghost" onClick={() => signOut()} className="gap-2">
+          <LogOut size={16} />
+          Sair
+        </Button>
+      </div>
       <Card className="w-full max-w-md shadow-lg border-primary/20">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-primary flex items-center justify-center gap-2">

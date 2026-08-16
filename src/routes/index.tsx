@@ -41,7 +41,7 @@ function LandingPage() {
   }
 
   // Redirecionamento automático se logado
-  if (user && profile && !profileError) {
+  if (user && profile && !profileError && !isLoading) {
     if (!profile.empresa_id) {
       return <Navigate to="/onboarding" replace />;
     } else if (profile.tipo === "gestor") {
