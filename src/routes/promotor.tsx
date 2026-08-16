@@ -27,6 +27,10 @@ function PromotorLayout() {
     return <ProfileErrorState />;
   }
 
+  if (!profile.empresa_id) {
+    return <Navigate to="/onboarding" />;
+  }
+
   if (profile.tipo !== "promotor") {
     // Evita redirecionamento se já estiver na rota certa
     return <Navigate to="/gestor/dashboard" replace />;

@@ -27,6 +27,10 @@ function GestorLayout() {
     return <ProfileErrorState />;
   }
 
+  if (!profile.empresa_id) {
+    return <Navigate to="/onboarding" />;
+  }
+
   if (profile.tipo !== "gestor") {
     // Evita redirecionamento se já estiver na rota certa
     return <Navigate to="/promotor/roteiro" replace />;

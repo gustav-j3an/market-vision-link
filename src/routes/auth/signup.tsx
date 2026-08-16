@@ -18,7 +18,6 @@ function SignupComponent() {
     name: "",
     email: "",
     password: "",
-    companyName: "",
     role: "gestor" as "gestor" | "promotor",
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -43,26 +42,12 @@ function SignupComponent() {
       if (authError) throw authError;
       if (!authData.user) throw new Error("Erro ao criar usuário");
 
-      // 2. Create company if it doesn't exist (or just always create a new one for signup)
-      // For this SaaS, we'll assume a new signup always starts a new company trial
-      const slug = formData.companyName.toLowerCase().replace(/ /g, "-");
-      const { data: companyData, error: companyError } = await supabase
-        .from("empresas")
-        .insert({
-          nome: formData.companyName,
-          slug,
-        })
-        .select()
-        .single();
-
-      if (companyError) throw companyError;
-
-      // 3. Create profile
+      // 2. Create profile (empresa_id is now null initially)
       const { error: profileError } = await supabase
         .from("profiles")
         .insert({
           id: authData.user.id,
-          empresa_id: companyData.id,
+          empresa_id: null,
           email: formData.email,
           nome: formData.name,
           tipo: formData.role,
@@ -70,13 +55,10 @@ function SignupComponent() {
 
       if (profileError) throw profileError;
 
-      toast.success("Cadastro realizado com sucesso!");
+      toast.success("Cadastro realizado com sucesso! Vamos completar seu perfil.");
       
-      if (formData.role === "gestor") {
-        navigate({ to: "/gestor/dashboard" as any });
-      } else {
-        navigate({ to: "/promotor/roteiro" as any });
-      }
+      // Redirect to onboarding
+      navigate({ to: "/onboarding" as any });
     } catch (error: any) {
       toast.error(error.message || "Erro ao realizar cadastro");
     } finally {
@@ -120,15 +102,6 @@ function SignupComponent() {
                 type="password" 
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                required 
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="company">Nome da Empresa</Label>
-              <Input 
-                id="company" 
-                value={formData.companyName}
-                onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
                 required 
               />
             </div>
