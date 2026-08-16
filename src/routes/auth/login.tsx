@@ -35,11 +35,13 @@ function LoginComponent() {
       // Get profile to redirect correctly
       const { data: profile } = await supabase
         .from("profiles")
-        .select("tipo")
+        .select("tipo, empresa_id")
         .eq("id", data.user.id)
         .single();
 
-      if (profile?.tipo === "gestor") {
+      if (!profile?.empresa_id) {
+        navigate({ to: "/onboarding" as any });
+      } else if (profile.tipo === "gestor") {
         navigate({ to: "/gestor/dashboard" as any });
       } else {
         navigate({ to: "/promotor/roteiro" as any });
