@@ -100,7 +100,13 @@ function OnboardingComponent() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
+      <div className="absolute top-4 right-4">
+        <Button variant="ghost" onClick={() => signOut()} className="gap-2">
+          <LogOut size={16} />
+          Sair
+        </Button>
+      </div>
       <Card className="w-full max-w-md shadow-lg border-primary/20">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-primary flex items-center justify-center gap-2">

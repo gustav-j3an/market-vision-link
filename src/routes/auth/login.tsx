@@ -32,31 +32,10 @@ function LoginComponent() {
       if (error) throw error;
       console.log("Login Auth sucesso:", data.user.id);
 
-      toast.success("Login realizado com sucesso!");
-      
-      // Get profile to redirect correctly
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("tipo, empresa_id")
-        .eq("id", data.user.id)
-        .maybeSingle();
-
-      if (profileError) {
-        console.error("Erro ao buscar perfil no login:", profileError);
-      }
-
-      console.log("Perfil carregado no login:", profile);
-
-      if (!profile?.empresa_id) {
-        console.log("Redirecionando para onboarding...");
-        navigate({ to: "/onboarding" as any });
-      } else if (profile.tipo === "gestor") {
-        console.log("Redirecionando para dashboard...");
-        navigate({ to: "/gestor/dashboard" as any });
-      } else {
-        console.log("Redirecionando para roteiro...");
-        navigate({ to: "/promotor/roteiro" as any });
-      }
+      // We don't need to manually navigate here because onAuthStateChange 
+      // in use-auth will trigger and the layout guards will handle redirection.
+      // But to be immediate, we can try to refresh profile
+      console.log("Login realizado. Aguardando processamento da sessão...");
     } catch (error: any) {
       console.error("Erro no processo de login:", error);
       toast.error(error.message || "Erro ao realizar login");
