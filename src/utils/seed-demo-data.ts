@@ -76,6 +76,7 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
       .from("roteiros")
       .select("loja_id")
       .eq("promotor_id", promotorRecord.id)
+
       .eq("data_prevista", today);
       
     const existingStoreIds = existingRoteiros?.map(r => r.loja_id) || [];
