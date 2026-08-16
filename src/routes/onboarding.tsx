@@ -7,14 +7,14 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, Building2, UserCircle2 } from "lucide-react";
+import { Loader2, Building2, UserCircle2, LogOut } from "lucide-react";
 
 export const Route = createFileRoute("/onboarding")({
   component: OnboardingComponent,
 });
 
 function OnboardingComponent() {
-  const { user, profile, isLoading, profileError, refreshProfile } = useAuth();
+  const { user, profile, isLoading, profileError, refreshProfile, signOut } = useAuth();
   const [companyName, setCompanyName] = useState("");
   const [gestorName, setGestorName] = useState(profile?.nome || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
