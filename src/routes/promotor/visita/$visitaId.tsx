@@ -90,13 +90,14 @@ function VisitaFlow() {
       setSaving(true);
       
       const payload = {
-        roteiro_id: roteiro.id,
+        parada_id: roteiro.id,
         promotor_id: roteiro.promotor_id,
         loja_id: roteiro.loja_id,
+        industria_id: roteiro.industria_id,
         inicio: visitaData.inicio,
         fim: isFinal ? new Date().toISOString() : null,
         observacoes: visitaData.observacoes,
-        status: isFinal ? 'concluido' : 'em_andamento'
+        status: isFinal ? 'concluida' : 'em_andamento'
       };
 
       // Upload one by one to show progress or handle errors per file
