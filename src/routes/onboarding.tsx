@@ -28,7 +28,7 @@ function OnboardingComponent() {
     );
   }
 
-  if (!user) {
+  if (!user || profileError) {
     return <Navigate to="/auth/login" />;
   }
 

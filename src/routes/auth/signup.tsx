@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/auth/signup")({
   component: SignupComponent,
@@ -55,10 +55,12 @@ function SignupComponent() {
 
       if (profileError) throw profileError;
 
-      toast.success("Cadastro realizado com sucesso! Vamos completar seu perfil.");
+      toast.success("Cadastro realizado com sucesso! Prossiga para configurar sua conta.");
       
-      // Redirect to onboarding
-      navigate({ to: "/onboarding" as any });
+      // No TanStack Start, o signUp pode não disparar o onAuthStateChange imediatamente se houver confirmação de email
+      // ou se o estado não for propagado a tempo para o redirecionamento automático do Router.
+      // Vamos para o login para garantir a sessão se não redirecionar.
+      navigate({ to: "/auth/login" as any });
     } catch (error: any) {
       toast.error(error.message || "Erro ao realizar cadastro");
     } finally {
@@ -123,8 +125,8 @@ function SignupComponent() {
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Criar Conta
+              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowRight className="mr-2 h-4 w-4" />}
+              Criar conta e Continuar
             </Button>
             <div className="text-center text-sm text-muted-foreground">
               Já tem uma conta?{" "}
