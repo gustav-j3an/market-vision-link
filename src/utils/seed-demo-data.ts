@@ -32,7 +32,7 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
   const { data: existingProducts } = await supabase.from("produtos").select("id, sku").eq("empresa_id", empresaId).in("sku", productSkus as string[]);
   const existingSkus = existingProducts?.map(p => p.sku) || [];
 
-  const productsToInsert = productsList.filter(p => !existingSkus.includes(p.sku || ""));
+  const productsToInsert = productsList.filter(p => p.sku && !existingSkus.includes(p.sku));
 
   if (productsToInsert.length > 0) {
     const { error: productsError } = await supabase.from("produtos").insert(productsToInsert);
@@ -102,6 +102,7 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
 
       if (createdRoteiros && createdRoteiros.length > 0) {
         const roteiroToComplete = createdRoteiros[0];
+        if (!roteiroToComplete) return true;
         
         // 1. Create Visit
         const now = new Date();
@@ -125,6 +126,7 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
           .single();
 
         if (visitError) throw visitError;
+        if (!visit) return true;
 
         // 2. Create Visit Items
         const visitItems = allProducts.map(p => ({
