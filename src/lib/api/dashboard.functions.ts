@@ -31,8 +31,8 @@ export const getDashboardStats = createServerFn({ method: "GET" })
       .from('roteiros')
       .select('id', { count: 'exact' })
       .eq('empresa_id', empresaId)
-      .gte('data_prevista', startIso.split('T')[0])
-      .lte('data_prevista', endIso.split('T')[0]);
+      .gte('data_prevista', format(startDate, 'yyyy-MM-dd'))
+      .lte('data_prevista', format(now, 'yyyy-MM-dd'));
 
     const { data: visitasConcluidas } = await supabase
       .from('visitas')
@@ -43,14 +43,22 @@ export const getDashboardStats = createServerFn({ method: "GET" })
       .lte('inicio', endIso);
 
     // 2. Ruptura stats
-    const { data: itensVisita } = await supabase
-      .from('itens_visita')
-      .select('status, produto_id, visita_id')
-      .in('visita_id', (visitasConcluidas || []).map(v => v.id));
+    const visitaIds = (visitasConcluidas || []).map(v => v.id);
+    let taxaRuptura = 0;
+    let rupturas = 0;
+    let itensVisita: any[] = [];
 
-    const totalItens = itensVisita?.length || 0;
-    const rupturas = itensVisita?.filter(i => i.status === 'ruptura').length || 0;
-    const taxaRuptura = totalItens > 0 ? (rupturas / totalItens) * 100 : 0;
+    if (visitaIds.length > 0) {
+      const { data: itens } = await supabase
+        .from('itens_visita')
+        .select('status, produto_id, visita_id')
+        .in('visita_id', visitaIds);
+      
+      itensVisita = itens || [];
+      const totalItens = itensVisita.length;
+      rupturas = itensVisita.filter(i => i.status === 'ruptura').length;
+      taxaRuptura = totalItens > 0 ? (rupturas / totalItens) * 100 : 0;
+    }
 
     // 3. Execução média
     const notas = visitasConcluidas?.filter(v => v.nota_execucao !== null).map(v => v.nota_execucao as number) || [];
@@ -95,7 +103,7 @@ export const getDashboardStats = createServerFn({ method: "GET" })
 
     // Ranking de rupturas por produto
     const rupturaPorProduto: Record<string, number> = {};
-    itensVisita?.filter(i => i.status === 'ruptura').forEach(i => {
+    itensVisita.filter(i => i.status === 'ruptura').forEach(i => {
       rupturaPorProduto[i.produto_id] = (rupturaPorProduto[i.produto_id] || 0) + 1;
     });
 
