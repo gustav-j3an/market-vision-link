@@ -8,8 +8,8 @@ export interface Roteiro {
   promotor_id: string;
   loja_id: string;
   data_prevista: string;
-  horario_previsto: string;
-  status: RoteiroStatus;
+  horario_previsto: string | null;
+  status: string;
   empresa_id: string;
   created_at: string;
   promotor?: {
@@ -21,30 +21,8 @@ export interface Roteiro {
   loja?: {
     id: string;
     nome: string;
-    rede: string;
+    rede: string | null;
   };
-}
-
-export interface Visita {
-  id: string;
-  roteiro_id: string;
-  promotor_id: string;
-  loja_id: string;
-  data_visita: string;
-  hora_inicio: string;
-  hora_fim?: string;
-  observacoes?: string;
-  empresa_id: string;
-}
-
-export interface ItemVisita {
-  id: string;
-  visita_id: string;
-  produto_id: string;
-  status: 'em_estoque' | 'estoque_baixo' | 'ruptura' | 'nao_encontrado';
-  preco?: number;
-  estoque_estimado?: number;
-  nota_execucao?: number;
 }
 
 export async function getRoteiros(empresaId: string) {
@@ -67,7 +45,6 @@ export async function getRoteiros(empresaId: string) {
 
   if (error) throw error;
   
-  // Transform to match the UI expectations if needed
   return data.map(item => ({
     ...item,
     promotor: item.promotores,
@@ -75,7 +52,14 @@ export async function getRoteiros(empresaId: string) {
   })) as unknown as Roteiro[];
 }
 
-export async function createRoteiro(roteiro: Omit<Roteiro, 'id' | 'created_at'>) {
+export async function createRoteiro(roteiro: {
+  promotor_id: string;
+  loja_id: string;
+  data_prevista: string;
+  horario_previsto: string | null;
+  empresa_id: string;
+  status?: string;
+}) {
   const { data, error } = await supabase
     .from('roteiros')
     .insert(roteiro)

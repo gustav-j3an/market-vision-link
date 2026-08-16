@@ -18,11 +18,13 @@ export function usePromotorRoteiros() {
         setLoading(true);
         
         // Find the promotor record for this profile
-        const { data: promotorData } = await supabase
+        const { data: promotorData, error: promotorError } = await supabase
           .from('promotores')
           .select('id')
           .eq('perfil_id', profile.id)
-          .single();
+          .maybeSingle();
+
+        if (promotorError) throw promotorError;
 
         if (!promotorData) {
           setRoteiros([]);
@@ -52,6 +54,7 @@ export function usePromotorRoteiros() {
           loja: r.lojas
         })) as unknown as Roteiro[]);
       } catch (err: any) {
+        console.error("Error fetching promotor roteiros:", err);
         setError(err);
       } finally {
         setLoading(false);

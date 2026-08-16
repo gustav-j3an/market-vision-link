@@ -15,12 +15,14 @@ export async function uploadVisitaFoto(visitaId: string, file: File, empresaId: 
     .from('visita-fotos')
     .getPublicUrl(filePath);
 
+  // In the real DB it's caminho_arquivo, but the UI might want the full URL.
+  // We'll store the path in caminho_arquivo as per types.ts.
   const { error: dbError } = await supabase
     .from('fotos_visita')
     .insert({
       visita_id: visitaId,
-      foto_url: urlData.publicUrl,
-      empresa_id: empresaId
+      caminho_arquivo: filePath,
+      legenda: null
     });
 
   if (dbError) throw dbError;
@@ -30,13 +32,17 @@ export async function uploadVisitaFoto(visitaId: string, file: File, empresaId: 
 
 export async function saveVisita(visita: any, itens: any[], fotos: File[], empresaId: string) {
   // 1. Create or update visita
+  // Map common fields to DB fields if different
+  const visitaToSave = {
+    ...visita,
+    empresa_id: empresaId,
+    inicio: visita.inicio || new Date().toISOString(),
+    status: visita.status || 'em_andamento'
+  };
+
   const { data: visitaData, error: visitaError } = await supabase
     .from('visitas')
-    .upsert({
-      ...visita,
-      empresa_id: empresaId,
-      data_visita: new Date().toISOString().split('T')[0]
-    })
+    .upsert(visitaToSave)
     .select()
     .single();
 
@@ -46,8 +52,7 @@ export async function saveVisita(visita: any, itens: any[], fotos: File[], empre
   if (itens.length > 0) {
     const itemsToSave = itens.map(item => ({
       ...item,
-      visita_id: visitaData.id,
-      empresa_id: empresaId
+      visita_id: visitaData.id
     }));
 
     const { error: itemsError } = await supabase
@@ -63,12 +68,12 @@ export async function saveVisita(visita: any, itens: any[], fotos: File[], empre
   }
 
   // 4. Update roteiro status if finished
-  if (visita.hora_fim) {
+  if (visita.fim && visita.roteiro_id) {
     await supabase
       .from('roteiros')
       .update({ status: 'concluido' })
       .eq('id', visita.roteiro_id);
-  } else {
+  } else if (visita.roteiro_id) {
     await supabase
       .from('roteiros')
       .update({ status: 'em_andamento' })
