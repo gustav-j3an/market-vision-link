@@ -30,9 +30,11 @@ const formSchema = z.object({
   loja_id: z.string().min(1, "Selecione uma loja"),
   industria_id: z.string().min(1, "Selecione uma indústria"),
   horario_previsto: z.string().optional(),
-  ordem: z.coerce.number().default(1),
+  ordem: z.coerce.number(),
   observacao: z.string().optional(),
 });
+
+type FormValues = z.infer<typeof formSchema>;
 
 interface ParadaFormProps {
   open: boolean;
