@@ -2,13 +2,14 @@ import { createFileRoute, Outlet, Navigate } from "@tanstack/react-router";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
+import { ProfileErrorState } from "@/components/auth/ProfileErrorState";
 
 export const Route = createFileRoute("/gestor")({
   component: GestorLayout,
 });
 
 function GestorLayout() {
-  const { user, profile, isLoading } = useAuth();
+  const { user, profile, isLoading, profileError } = useAuth();
 
   if (isLoading) {
     return (
@@ -22,8 +23,13 @@ function GestorLayout() {
     return <Navigate to="/auth/login" />;
   }
 
-  if (profile?.tipo !== "gestor") {
-    return <Navigate to="/promotor/roteiro" />;
+  if (profileError || !profile) {
+    return <ProfileErrorState />;
+  }
+
+  if (profile.tipo !== "gestor") {
+    // Evita redirecionamento se já estiver na rota certa
+    return <Navigate to="/promotor/roteiro" replace />;
   }
 
   return (

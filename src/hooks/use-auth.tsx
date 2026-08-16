@@ -12,6 +12,7 @@ interface AuthContextType {
   user: User | null;
   profile: Profile | null;
   isLoading: boolean;
+  profileError: boolean;
   signOut: () => Promise<void>;
 }
 
@@ -22,6 +23,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [profileError, setProfileError] = useState(false);
 
   useEffect(() => {
     // Get initial session
@@ -31,6 +33,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (session?.user) {
         fetchProfile(session.user.id);
       } else {
+        setProfile(null);
+        setProfileError(false);
         setIsLoading(false);
       }
     });
@@ -44,6 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await fetchProfile(session.user.id);
       } else {
         setProfile(null);
+        setProfileError(false);
         setIsLoading(false);
       }
     });
@@ -52,17 +57,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const fetchProfile = async (userId: string) => {
+    setIsLoading(true);
+    setProfileError(false);
     try {
       const { data, error } = await supabase
         .from("profiles")
         .select("*, empresa:empresas(*)")
         .eq("id", userId)
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
-      setProfile(data as any);
+      if (error) {
+        console.error("Error fetching profile:", error);
+        setProfileError(true);
+      } else if (!data) {
+        console.warn("No profile found for user:", userId);
+        setProfile(null);
+        setProfileError(true);
+      } else {
+        setProfile(data as any);
+        setProfileError(false);
+      }
     } catch (error) {
-      console.error("Error fetching profile:", error);
+      console.error("Unexpected error fetching profile:", error);
+      setProfileError(true);
     } finally {
       setIsLoading(false);
     }
@@ -73,7 +90,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, profile, isLoading, signOut }}>
+    <AuthContext.Provider value={{ session, user, profile, isLoading, profileError, signOut }}>
       {children}
     </AuthContext.Provider>
   );
