@@ -70,8 +70,8 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
     const { data: existingRoteiros } = await supabase
       .from("roteiros")
       .select("loja_id")
-      .eq("promotor_id", promotorId)
-      .eq("data_prevista", today);
+      .filter('promotor_id', 'eq', promotorId)
+      .filter('data_prevista', 'eq', today);
       
     const existingStoreIds = existingRoteiros?.map(r => r.loja_id) || [];
 
