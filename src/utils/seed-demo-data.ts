@@ -73,7 +73,6 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
     const today = new Date().toISOString().split('T')[0];
     const promotorId = promotorRecord.id;
     
-    // Check if we already have roteiros for today
     const { data: existingRoteiros } = await supabase
       .from("roteiros")
       .select("id, loja_id, status")
@@ -82,27 +81,25 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
       
     const existingStoreIds = existingRoteiros?.map(r => r.loja_id) || [];
 
-    // Create Roteiros for stores that don't have them today
-    const storesNeedingRoteiro = allStores.filter(s => !existingStoreIds.includes(s.id));
+    const storesNeedingRoteiro = allStores.filter(s => s.id && !existingStoreIds.includes(s.id));
     
     if (storesNeedingRoteiro.length > 0) {
       const roteirosToInsert = storesNeedingRoteiro.map((store, index) => ({
         promotor_id: promotorId,
-        loja_id: store.id,
+        loja_id: store.id!,
         data_prevista: today,
         horario_previsto: index === 0 ? "08:00" : index === 1 ? "10:30" : "14:00",
-        status: 'pendente',
+        status: 'pendente' as const,
         empresa_id: empresaId
       }));
 
       const { data: createdRoteiros, error: roteirosError } = await supabase
         .from("roteiros")
-        .insert(roteirosToInsert as any)
+        .insert(roteirosToInsert)
         .select();
         
       if (roteirosError) throw roteirosError;
 
-      // Automatically complete the first roteiro to seed the dashboard
       if (createdRoteiros && createdRoteiros.length > 0) {
         const roteiroToComplete = createdRoteiros[0];
         
@@ -119,7 +116,7 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
             loja_id: roteiroToComplete.loja_id,
             inicio: startTime,
             fim: endTime,
-            status: 'concluido',
+            status: 'concluido' as const,
             nota_execucao: 85,
             observacoes: "Gôndola organizada, porém identificada ruptura no SKU de Refrigerante Cola 2L. Reposição solicitada ao gerente da loja.",
             empresa_id: empresaId
@@ -133,8 +130,8 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
         const visitItems = allProducts.map(p => ({
           visita_id: visit.id,
           produto_id: p.id,
-          status: p.nome.includes("Cola") ? 'ruptura' : 'em_estoque',
-          preco: p.nome.includes("Suco") ? 8.90 : p.nome.includes("Cerveja") ? 12.50 : 5.50,
+          status: (p.nome?.includes("Cola") ? 'ruptura' : 'em_estoque') as "ruptura" | "em_estoque",
+          preco: p.nome?.includes("Suco") ? 8.90 : p.nome?.includes("Cerveja") ? 12.50 : 5.50,
           empresa_id: empresaId
         }));
 
@@ -145,13 +142,13 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
         const visitPhotos = [
           {
             visita_id: visit.id,
-            foto_url: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=800",
+            caminho_arquivo: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=800",
             legenda: "Gôndola de Bebidas - Início da Visita",
             empresa_id: empresaId
           },
           {
             visita_id: visit.id,
-            foto_url: "https://images.unsplash.com/photo-1604719312566-8912e9227c6a?auto=format&fit=crop&q=80&w=800",
+            caminho_arquivo: "https://images.unsplash.com/photo-1604719312566-8912e9227c6a?auto=format&fit=crop&q=80&w=800",
             legenda: "Exposição Frontal - Sucos",
             empresa_id: empresaId
           }
