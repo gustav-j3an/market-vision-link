@@ -10,33 +10,147 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as GestorRouteImport } from './routes/gestor'
+import { Route as PromotorRouteImport } from './routes/promotor'
+import { Route as GestorDashboardRouteImport } from './routes/gestor/dashboard'
+import { Route as PromotorRoteiroRouteImport } from './routes/promotor/roteiro'
+import { Route as GestorLojasIndexRouteImport } from './routes/gestor/lojas/index'
+import { Route as GestorProdutosIndexRouteImport } from './routes/gestor/produtos/index'
+import { Route as GestorPromotoresIndexRouteImport } from './routes/gestor/promotores/index'
+import { Route as GestorRelatoriosIndexRouteImport } from './routes/gestor/relatorios/index'
+import { Route as GestorVisitasIndexRouteImport } from './routes/gestor/visitas/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GestorRoute = GestorRouteImport.update({
+  id: '/gestor',
+  path: '/gestor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PromotorRoute = PromotorRouteImport.update({
+  id: '/promotor',
+  path: '/promotor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GestorDashboardRoute = GestorDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => GestorRoute,
+} as any)
+const PromotorRoteiroRoute = PromotorRoteiroRouteImport.update({
+  id: '/roteiro',
+  path: '/roteiro',
+  getParentRoute: () => PromotorRoute,
+} as any)
+const GestorLojasIndexRoute = GestorLojasIndexRouteImport.update({
+  id: '/lojas/',
+  path: '/lojas/',
+  getParentRoute: () => GestorRoute,
+} as any)
+const GestorProdutosIndexRoute = GestorProdutosIndexRouteImport.update({
+  id: '/produtos/',
+  path: '/produtos/',
+  getParentRoute: () => GestorRoute,
+} as any)
+const GestorPromotoresIndexRoute = GestorPromotoresIndexRouteImport.update({
+  id: '/promotores/',
+  path: '/promotores/',
+  getParentRoute: () => GestorRoute,
+} as any)
+const GestorRelatoriosIndexRoute = GestorRelatoriosIndexRouteImport.update({
+  id: '/relatorios/',
+  path: '/relatorios/',
+  getParentRoute: () => GestorRoute,
+} as any)
+const GestorVisitasIndexRoute = GestorVisitasIndexRouteImport.update({
+  id: '/visitas/',
+  path: '/visitas/',
+  getParentRoute: () => GestorRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/gestor': typeof GestorRouteWithChildren
+  '/promotor': typeof PromotorRouteWithChildren
+  '/gestor/dashboard': typeof GestorDashboardRoute
+  '/promotor/roteiro': typeof PromotorRoteiroRoute
+  '/gestor/lojas/': typeof GestorLojasIndexRoute
+  '/gestor/produtos/': typeof GestorProdutosIndexRoute
+  '/gestor/promotores/': typeof GestorPromotoresIndexRoute
+  '/gestor/relatorios/': typeof GestorRelatoriosIndexRoute
+  '/gestor/visitas/': typeof GestorVisitasIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/gestor': typeof GestorRouteWithChildren
+  '/promotor': typeof PromotorRouteWithChildren
+  '/gestor/dashboard': typeof GestorDashboardRoute
+  '/promotor/roteiro': typeof PromotorRoteiroRoute
+  '/gestor/lojas': typeof GestorLojasIndexRoute
+  '/gestor/produtos': typeof GestorProdutosIndexRoute
+  '/gestor/promotores': typeof GestorPromotoresIndexRoute
+  '/gestor/relatorios': typeof GestorRelatoriosIndexRoute
+  '/gestor/visitas': typeof GestorVisitasIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/gestor': typeof GestorRouteWithChildren
+  '/promotor': typeof PromotorRouteWithChildren
+  '/gestor/dashboard': typeof GestorDashboardRoute
+  '/promotor/roteiro': typeof PromotorRoteiroRoute
+  '/gestor/lojas/': typeof GestorLojasIndexRoute
+  '/gestor/produtos/': typeof GestorProdutosIndexRoute
+  '/gestor/promotores/': typeof GestorPromotoresIndexRoute
+  '/gestor/relatorios/': typeof GestorRelatoriosIndexRoute
+  '/gestor/visitas/': typeof GestorVisitasIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/gestor'
+    | '/promotor'
+    | '/gestor/dashboard'
+    | '/promotor/roteiro'
+    | '/gestor/lojas/'
+    | '/gestor/produtos/'
+    | '/gestor/promotores/'
+    | '/gestor/relatorios/'
+    | '/gestor/visitas/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/gestor'
+    | '/promotor'
+    | '/gestor/dashboard'
+    | '/promotor/roteiro'
+    | '/gestor/lojas'
+    | '/gestor/produtos'
+    | '/gestor/promotores'
+    | '/gestor/relatorios'
+    | '/gestor/visitas'
+  id:
+    | '__root__'
+    | '/'
+    | '/gestor'
+    | '/promotor'
+    | '/gestor/dashboard'
+    | '/promotor/roteiro'
+    | '/gestor/lojas/'
+    | '/gestor/produtos/'
+    | '/gestor/promotores/'
+    | '/gestor/relatorios/'
+    | '/gestor/visitas/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  GestorRoute: typeof GestorRouteWithChildren
+  PromotorRoute: typeof PromotorRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +162,109 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/gestor': {
+      id: '/gestor'
+      path: '/gestor'
+      fullPath: '/gestor'
+      preLoaderRoute: typeof GestorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/promotor': {
+      id: '/promotor'
+      path: '/promotor'
+      fullPath: '/promotor'
+      preLoaderRoute: typeof PromotorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gestor/dashboard': {
+      id: '/gestor/dashboard'
+      path: '/dashboard'
+      fullPath: '/gestor/dashboard'
+      preLoaderRoute: typeof GestorDashboardRouteImport
+      parentRoute: typeof GestorRoute
+    }
+    '/promotor/roteiro': {
+      id: '/promotor/roteiro'
+      path: '/roteiro'
+      fullPath: '/promotor/roteiro'
+      preLoaderRoute: typeof PromotorRoteiroRouteImport
+      parentRoute: typeof PromotorRoute
+    }
+    '/gestor/lojas/': {
+      id: '/gestor/lojas/'
+      path: '/lojas'
+      fullPath: '/gestor/lojas/'
+      preLoaderRoute: typeof GestorLojasIndexRouteImport
+      parentRoute: typeof GestorRoute
+    }
+    '/gestor/produtos/': {
+      id: '/gestor/produtos/'
+      path: '/produtos'
+      fullPath: '/gestor/produtos/'
+      preLoaderRoute: typeof GestorProdutosIndexRouteImport
+      parentRoute: typeof GestorRoute
+    }
+    '/gestor/promotores/': {
+      id: '/gestor/promotores/'
+      path: '/promotores'
+      fullPath: '/gestor/promotores/'
+      preLoaderRoute: typeof GestorPromotoresIndexRouteImport
+      parentRoute: typeof GestorRoute
+    }
+    '/gestor/relatorios/': {
+      id: '/gestor/relatorios/'
+      path: '/relatorios'
+      fullPath: '/gestor/relatorios/'
+      preLoaderRoute: typeof GestorRelatoriosIndexRouteImport
+      parentRoute: typeof GestorRoute
+    }
+    '/gestor/visitas/': {
+      id: '/gestor/visitas/'
+      path: '/visitas'
+      fullPath: '/gestor/visitas/'
+      preLoaderRoute: typeof GestorVisitasIndexRouteImport
+      parentRoute: typeof GestorRoute
+    }
   }
 }
 
+interface GestorRouteChildren {
+  GestorDashboardRoute: typeof GestorDashboardRoute
+  GestorLojasIndexRoute: typeof GestorLojasIndexRoute
+  GestorProdutosIndexRoute: typeof GestorProdutosIndexRoute
+  GestorPromotoresIndexRoute: typeof GestorPromotoresIndexRoute
+  GestorRelatoriosIndexRoute: typeof GestorRelatoriosIndexRoute
+  GestorVisitasIndexRoute: typeof GestorVisitasIndexRoute
+}
+
+const GestorRouteChildren: GestorRouteChildren = {
+  GestorDashboardRoute: GestorDashboardRoute,
+  GestorLojasIndexRoute: GestorLojasIndexRoute,
+  GestorProdutosIndexRoute: GestorProdutosIndexRoute,
+  GestorPromotoresIndexRoute: GestorPromotoresIndexRoute,
+  GestorRelatoriosIndexRoute: GestorRelatoriosIndexRoute,
+  GestorVisitasIndexRoute: GestorVisitasIndexRoute,
+}
+
+const GestorRouteWithChildren =
+  GestorRoute._addFileChildren(GestorRouteChildren)
+
+interface PromotorRouteChildren {
+  PromotorRoteiroRoute: typeof PromotorRoteiroRoute
+}
+
+const PromotorRouteChildren: PromotorRouteChildren = {
+  PromotorRoteiroRoute: PromotorRoteiroRoute,
+}
+
+const PromotorRouteWithChildren = PromotorRoute._addFileChildren(
+  PromotorRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  GestorRoute: GestorRouteWithChildren,
+  PromotorRoute: PromotorRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
