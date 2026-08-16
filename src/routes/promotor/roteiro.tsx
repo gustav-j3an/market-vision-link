@@ -113,26 +113,26 @@ function Roteiro() {
               </div>
               <Button 
                 size="sm" 
-                variant={roteiro.status === 'concluido' ? "outline" : "default"}
-                disabled={loadingAction === roteiro.id}
+                variant={parada.status === 'concluida' ? "outline" : "default"}
+                disabled={loadingAction === parada.id}
                 onClick={() => {
-                  if (roteiro.status === 'concluido' || roteiro.status === 'em_andamento') {
-                    navigate({ to: `/promotor/visita/${roteiro.id}` as any });
+                  if (parada.status === 'concluida' || parada.status === 'em_andamento') {
+                    navigate({ to: `/promotor/visita/${parada.id}` as any });
                   } else {
-                    handleStartVisita(roteiro);
+                    handleStartVisita(parada);
                   }
                 }}
               >
-                {loadingAction === roteiro.id ? (
+                {loadingAction === parada.id ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : roteiro.status === 'concluido' ? (
+                ) : parada.status === 'concluida' ? (
                   "Ver Resumo"
-                ) : roteiro.status === 'em_andamento' ? (
+                ) : parada.status === 'em_andamento' ? (
                   "Continuar"
                 ) : (
                   "Iniciar"
                 )}
-                {loadingAction !== roteiro.id && <ArrowRight className="ml-2" size={14} />}
+                {loadingAction !== parada.id && <ArrowRight className="ml-2" size={14} />}
               </Button>
 
             </CardContent>
