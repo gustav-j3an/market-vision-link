@@ -21,6 +21,7 @@ import { Route as GestorLojasIndexRouteImport } from './routes/gestor/lojas/inde
 import { Route as GestorProdutosIndexRouteImport } from './routes/gestor/produtos/index'
 import { Route as GestorPromotoresIndexRouteImport } from './routes/gestor/promotores/index'
 import { Route as GestorRelatoriosIndexRouteImport } from './routes/gestor/relatorios/index'
+import { Route as GestorRoteirosIndexRouteImport } from './routes/gestor/roteiros/index'
 import { Route as GestorVisitasIndexRouteImport } from './routes/gestor/visitas/index'
 import { Route as PromotorVisitaVisitaIdRouteImport } from './routes/promotor/visita/$visitaId'
 
@@ -84,6 +85,11 @@ const GestorRelatoriosIndexRoute = GestorRelatoriosIndexRouteImport.update({
   path: '/relatorios/',
   getParentRoute: () => GestorRoute,
 } as any)
+const GestorRoteirosIndexRoute = GestorRoteirosIndexRouteImport.update({
+  id: '/roteiros/',
+  path: '/roteiros/',
+  getParentRoute: () => GestorRoute,
+} as any)
 const GestorVisitasIndexRoute = GestorVisitasIndexRouteImport.update({
   id: '/visitas/',
   path: '/visitas/',
@@ -109,6 +115,7 @@ export interface FileRoutesByFullPath {
   '/gestor/produtos/': typeof GestorProdutosIndexRoute
   '/gestor/promotores/': typeof GestorPromotoresIndexRoute
   '/gestor/relatorios/': typeof GestorRelatoriosIndexRoute
+  '/gestor/roteiros/': typeof GestorRoteirosIndexRoute
   '/gestor/visitas/': typeof GestorVisitasIndexRoute
 }
 export interface FileRoutesByTo {
@@ -125,6 +132,7 @@ export interface FileRoutesByTo {
   '/gestor/produtos': typeof GestorProdutosIndexRoute
   '/gestor/promotores': typeof GestorPromotoresIndexRoute
   '/gestor/relatorios': typeof GestorRelatoriosIndexRoute
+  '/gestor/roteiros': typeof GestorRoteirosIndexRoute
   '/gestor/visitas': typeof GestorVisitasIndexRoute
 }
 export interface FileRoutesById {
@@ -142,6 +150,7 @@ export interface FileRoutesById {
   '/gestor/produtos/': typeof GestorProdutosIndexRoute
   '/gestor/promotores/': typeof GestorPromotoresIndexRoute
   '/gestor/relatorios/': typeof GestorRelatoriosIndexRoute
+  '/gestor/roteiros/': typeof GestorRoteirosIndexRoute
   '/gestor/visitas/': typeof GestorVisitasIndexRoute
 }
 export interface FileRouteTypes {
@@ -160,6 +169,7 @@ export interface FileRouteTypes {
     | '/gestor/produtos/'
     | '/gestor/promotores/'
     | '/gestor/relatorios/'
+    | '/gestor/roteiros/'
     | '/gestor/visitas/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -176,6 +186,7 @@ export interface FileRouteTypes {
     | '/gestor/produtos'
     | '/gestor/promotores'
     | '/gestor/relatorios'
+    | '/gestor/roteiros'
     | '/gestor/visitas'
   id:
     | '__root__'
@@ -192,6 +203,7 @@ export interface FileRouteTypes {
     | '/gestor/produtos/'
     | '/gestor/promotores/'
     | '/gestor/relatorios/'
+    | '/gestor/roteiros/'
     | '/gestor/visitas/'
   fileRoutesById: FileRoutesById
 }
@@ -290,6 +302,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GestorRelatoriosIndexRouteImport
       parentRoute: typeof GestorRoute
     }
+    '/gestor/roteiros/': {
+      id: '/gestor/roteiros/'
+      path: '/roteiros'
+      fullPath: '/gestor/roteiros/'
+      preLoaderRoute: typeof GestorRoteirosIndexRouteImport
+      parentRoute: typeof GestorRoute
+    }
     '/gestor/visitas/': {
       id: '/gestor/visitas/'
       path: '/visitas'
@@ -313,6 +332,7 @@ interface GestorRouteChildren {
   GestorProdutosIndexRoute: typeof GestorProdutosIndexRoute
   GestorPromotoresIndexRoute: typeof GestorPromotoresIndexRoute
   GestorRelatoriosIndexRoute: typeof GestorRelatoriosIndexRoute
+  GestorRoteirosIndexRoute: typeof GestorRoteirosIndexRoute
   GestorVisitasIndexRoute: typeof GestorVisitasIndexRoute
 }
 
@@ -322,6 +342,7 @@ const GestorRouteChildren: GestorRouteChildren = {
   GestorProdutosIndexRoute: GestorProdutosIndexRoute,
   GestorPromotoresIndexRoute: GestorPromotoresIndexRoute,
   GestorRelatoriosIndexRoute: GestorRelatoriosIndexRoute,
+  GestorRoteirosIndexRoute: GestorRoteirosIndexRoute,
   GestorVisitasIndexRoute: GestorVisitasIndexRoute,
 }
 
