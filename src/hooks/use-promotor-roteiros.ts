@@ -49,7 +49,7 @@ export function usePromotorRoteiros() {
               marca
             )
           `)
-          .eq('promotor_id', promotorId)
+          .eq('promotor_id', promotorId as any)
           .eq('data', today)
           .order('ordem', { ascending: true });
 
