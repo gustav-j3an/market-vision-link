@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { Roteiro } from '@/lib/api/roteiros';
 
 export function usePromotorRoteiros() {
-  const { user, profile } = useAuth();
+  const { profile } = useAuth();
   const [roteiros, setRoteiros] = useState<Roteiro[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -17,7 +17,6 @@ export function usePromotorRoteiros() {
       try {
         setLoading(true);
         
-        // Find the promotor record for this profile
         const { data: promotorData, error: promotorError } = await supabase
           .from('promotores')
           .select('id')
@@ -32,7 +31,6 @@ export function usePromotorRoteiros() {
         }
 
         const today = new Date().toISOString().split('T')[0];
-        const promotorId: string = promotorData.id;
         
         const { data, error } = await supabase
           .from('roteiros')
@@ -46,7 +44,7 @@ export function usePromotorRoteiros() {
               cidade
             )
           `)
-          .eq('promotor_id', promotorId)
+          .eq('promotor_id', promotorData.id)
           .eq('data_prevista', today)
           .order('horario_previsto', { ascending: true });
 
