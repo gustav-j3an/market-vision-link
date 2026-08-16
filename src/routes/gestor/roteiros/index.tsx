@@ -4,15 +4,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Calendar, MapPin, User, Trash2, Edit } from "lucide-react";
+import { Plus, Search, Trash2, Edit } from "lucide-react";
 import { getRoteiros, deleteRoteiro, Roteiro } from "@/lib/api/roteiros";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { RoteiroForm } from "@/components/gestor/RoteiroForm";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/gestor/roteiros/")({
   component: RoteirosPage,
@@ -23,6 +24,8 @@ function RoteirosPage() {
   const [roteiros, setRoteiros] = useState<Roteiro[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingRoteiro, setEditingRoteiro] = useState<Roteiro | null>(null);
 
   const fetchRoteiros = async () => {
     if (!profile?.empresa_id) return;
@@ -64,7 +67,10 @@ function RoteirosPage() {
         title="Roteiros" 
         description="Planeje e acompanhe as visitas dos promotores."
         actions={
-          <Button onClick={() => toast.info("Funcionalidade de criação em breve")}>
+          <Button onClick={() => {
+            setEditingRoteiro(null);
+            setIsFormOpen(true);
+          }}>
             <Plus className="mr-2 h-4 w-4" /> Novo Roteiro
           </Button>
         }
@@ -128,7 +134,10 @@ function RoteirosPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="icon" onClick={() => toast.info("Edição em breve")}>
+                      <Button variant="ghost" size="icon" onClick={() => {
+                        setEditingRoteiro(roteiro);
+                        setIsFormOpen(true);
+                      }}>
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(roteiro.id)}>
@@ -142,12 +151,14 @@ function RoteirosPage() {
           </TableBody>
         </Table>
       </Card>
+      <RoteiroForm 
+        open={isFormOpen} 
+        onOpenChange={setIsFormOpen} 
+        onSuccess={fetchRoteiros}
+        roteiro={editingRoteiro}
+      />
     </div>
   );
-}
-
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(" ");
 }
 
 
