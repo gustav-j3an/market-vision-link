@@ -30,7 +30,7 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
   
   const productSkus = productsList.map(p => p.sku).filter(Boolean) as string[];
   const { data: existingProducts } = await supabase.from("produtos").select("id, sku").eq("empresa_id", empresaId).in("sku", productSkus);
-  const existingSkus = existingProducts?.map(p => p.sku).filter(Boolean) as string[] || [];
+  const existingSkus = (existingProducts?.map(p => p.sku).filter(Boolean) as string[]) || [];
 
   const productsToInsert = productsList.filter(p => p.sku && !existingSkus.includes(p.sku));
 
@@ -70,7 +70,7 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
 
   // 5. Seed Roteiros and a Finished Visit for Today
   if (promotorRecord?.id && allStores && allStores.length > 0 && allProducts && allProducts.length > 0) {
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split('T')[0]!;
     const promotorId = promotorRecord.id;
     
     const { data: existingRoteiros } = await supabase
