@@ -34,10 +34,25 @@ function LoginComponent() {
       
       toast.success("Login realizado com sucesso!");
       
-      // Embora o AuthProvider trate o redirecionamento reativamente,
-      // em alguns casos de rede lenta ou estados de cache, forçamos um refresh
-      // do perfil para garantir que os guardiões de rota tenham dados frescos.
-      console.log("Login realizado. Aguardando processamento da sessão...");
+      // Forçamos um refresh do perfil e redirecionamento manual após sucesso
+      // para garantir que o usuário não fique preso na tela de login
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("tipo, empresa_id")
+        .eq("id", data.user?.id)
+        .maybeSingle();
+
+      if (profileData) {
+        if (!profileData.empresa_id) {
+          navigate({ to: "/onboarding" as any, replace: true });
+        } else if (profileData.tipo === "gestor") {
+          navigate({ to: "/gestor/dashboard" as any, replace: true });
+        } else if (profileData.tipo === "promotor") {
+          navigate({ to: "/promotor/roteiro" as any, replace: true });
+        }
+      } else {
+        console.warn("Perfil não encontrado após login");
+      }
     } catch (error: any) {
       console.error("Erro no processo de login:", error);
       let errorMessage = "Erro ao realizar login";
