@@ -25,6 +25,10 @@ function SignupComponent() {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
+    
+    if (isLoading) return;
+    
     setIsLoading(true);
     console.log("Iniciando signup para:", formData.email);
 
@@ -45,7 +49,7 @@ function SignupComponent() {
       
       console.log("Usuário criado no Auth:", authData.user.id);
 
-      // 2. Create profile (empresa_id is now null initially)
+      // 2. Create profile
       const { error: profileError } = await supabase
         .from("profiles")
         .upsert({
@@ -64,12 +68,13 @@ function SignupComponent() {
       console.log("Perfil criado com sucesso. Redirecionando para login...");
       toast.success("Cadastro realizado com sucesso! Prossiga para configurar sua conta.");
       
-      // Redirect to login to establish session
-      navigate({ to: "/auth/login" as any });
+      // Delay navigation slightly to ensure toast and state are handled
+      setTimeout(() => {
+        navigate({ to: "/auth/login" as any });
+      }, 100);
     } catch (error: any) {
       console.error("Erro no processo de signup:", error);
       toast.error(error.message || "Erro ao realizar cadastro");
-    } finally {
       setIsLoading(false);
     }
   };
