@@ -81,7 +81,10 @@ function SignupComponent() {
           <CardTitle className="text-2xl font-bold text-primary">TradeVision</CardTitle>
           <CardDescription>Crie sua conta para começar.</CardDescription>
         </CardHeader>
-        <form onSubmit={handleSignup}>
+        <form onSubmit={(e) => {
+          console.log("Form onSubmit event triggered");
+          handleSignup(e);
+        }}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Nome Completo</Label>
