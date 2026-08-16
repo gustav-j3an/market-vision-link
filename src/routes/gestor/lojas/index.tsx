@@ -43,11 +43,15 @@ function Lojas() {
 
   return (
     <>
-      <PageHeader title="Lojas" description="Gerencie as redes e unidades atendidas.">
-        <Button onClick={() => setIsFormOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Nova Loja
-        </Button>
-      </PageHeader>
+      <PageHeader 
+        title="Lojas" 
+        description="Gerencie as redes e unidades atendidas."
+        actions={
+          <Button onClick={() => setIsFormOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" /> Nova Loja
+          </Button>
+        }
+      />
 
       {isLoading ? (
         <div className="flex justify-center py-12">
