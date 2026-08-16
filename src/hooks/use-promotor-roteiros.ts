@@ -32,8 +32,9 @@ export function usePromotorRoteiros() {
 
         const today = new Date().toISOString().split('T')[0];
         
-        // Non-null assertion for TypeScript, already checked above
-        const promotorId: string = promotorData.id as string;
+        // Use Type Assertion for the whole query chain or the specific field
+        // The error TS2345 in .eq('promotor_id', promotorId) suggests it thinks promotorId is string | undefined
+        const promotorId = promotorData.id as string;
         
         const { data, error } = await supabase
           .from('roteiros')
