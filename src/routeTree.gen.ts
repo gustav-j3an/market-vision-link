@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GestorRouteImport } from './routes/gestor'
 import { Route as PromotorRouteImport } from './routes/promotor'
+import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as GestorDashboardRouteImport } from './routes/gestor/dashboard'
 import { Route as PromotorRoteiroRouteImport } from './routes/promotor/roteiro'
 import { Route as GestorLojasIndexRouteImport } from './routes/gestor/lojas/index'
@@ -33,6 +34,11 @@ const GestorRoute = GestorRouteImport.update({
 const PromotorRoute = PromotorRouteImport.update({
   id: '/promotor',
   path: '/promotor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/auth/login',
+  path: '/auth/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GestorDashboardRoute = GestorDashboardRouteImport.update({
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/gestor': typeof GestorRouteWithChildren
   '/promotor': typeof PromotorRouteWithChildren
+  '/auth/login': typeof AuthLoginRoute
   '/gestor/dashboard': typeof GestorDashboardRoute
   '/promotor/roteiro': typeof PromotorRoteiroRoute
   '/gestor/lojas/': typeof GestorLojasIndexRoute
@@ -87,6 +94,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/gestor': typeof GestorRouteWithChildren
   '/promotor': typeof PromotorRouteWithChildren
+  '/auth/login': typeof AuthLoginRoute
   '/gestor/dashboard': typeof GestorDashboardRoute
   '/promotor/roteiro': typeof PromotorRoteiroRoute
   '/gestor/lojas': typeof GestorLojasIndexRoute
@@ -100,6 +108,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/gestor': typeof GestorRouteWithChildren
   '/promotor': typeof PromotorRouteWithChildren
+  '/auth/login': typeof AuthLoginRoute
   '/gestor/dashboard': typeof GestorDashboardRoute
   '/promotor/roteiro': typeof PromotorRoteiroRoute
   '/gestor/lojas/': typeof GestorLojasIndexRoute
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/'
     | '/gestor'
     | '/promotor'
+    | '/auth/login'
     | '/gestor/dashboard'
     | '/promotor/roteiro'
     | '/gestor/lojas/'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/'
     | '/gestor'
     | '/promotor'
+    | '/auth/login'
     | '/gestor/dashboard'
     | '/promotor/roteiro'
     | '/gestor/lojas'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/'
     | '/gestor'
     | '/promotor'
+    | '/auth/login'
     | '/gestor/dashboard'
     | '/promotor/roteiro'
     | '/gestor/lojas/'
@@ -151,6 +163,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   GestorRoute: typeof GestorRouteWithChildren
   PromotorRoute: typeof PromotorRouteWithChildren
+  AuthLoginRoute: typeof AuthLoginRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -174,6 +187,13 @@ declare module '@tanstack/react-router' {
       path: '/promotor'
       fullPath: '/promotor'
       preLoaderRoute: typeof PromotorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/auth/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/gestor/dashboard': {
@@ -265,6 +285,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   GestorRoute: GestorRouteWithChildren,
   PromotorRoute: PromotorRouteWithChildren,
+  AuthLoginRoute: AuthLoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
