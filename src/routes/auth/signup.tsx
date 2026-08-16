@@ -28,10 +28,8 @@ function SignupComponent() {
     if (isLoading) return;
     
     setIsLoading(true);
-    console.log("DEBUG: handleSignup called");
 
     try {
-      console.log("DEBUG: Calling supabase.auth.signUp");
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -42,33 +40,24 @@ function SignupComponent() {
         },
       });
 
-      if (authError) {
-        console.error("DEBUG: authError", authError);
-        throw authError;
-      }
-      
-      console.log("DEBUG: authData success", authData.user?.id);
+      if (authError) throw authError;
+      if (!authData.user) throw new Error("Erro ao criar usuário");
 
       const { error: profileError } = await supabase
         .from("profiles")
         .upsert({
-          id: authData.user!.id,
+          id: authData.user.id,
           empresa_id: null,
           email: formData.email,
           nome: formData.name,
           tipo: formData.role,
         });
 
-      if (profileError) {
-        console.error("DEBUG: profileError", profileError);
-        throw profileError;
-      }
+      if (profileError) throw profileError;
 
-      console.log("DEBUG: All success, navigating");
       toast.success("Cadastro realizado com sucesso!");
       navigate({ to: "/auth/login" as any });
     } catch (error: any) {
-      console.error("DEBUG: Catch error", error);
       toast.error(error.message || "Erro ao realizar cadastro");
       setIsLoading(false);
     }
@@ -82,7 +71,8 @@ function SignupComponent() {
           <CardDescription>Crie sua conta para começar.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="space-y-4" onSubmit={handleSignup}>
+          {/* USANDO DIV COM BOTÃO PARA EVITAR COMPORTAMENTO ESTRANHO DO FORM NO SANDBOX */}
+          <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Nome Completo</Label>
               <Input 
@@ -128,11 +118,16 @@ function SignupComponent() {
                 </SelectContent>
               </Select>
             </div>
-            <Button type="submit" className="w-full h-12" disabled={isLoading}>
+            <Button 
+              type="button" 
+              className="w-full h-12" 
+              disabled={isLoading}
+              onClick={handleSignup}
+            >
               {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowRight className="mr-2 h-4 w-4" />}
               Criar conta e Continuar
             </Button>
-          </form>
+          </div>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
           <div className="text-center text-sm text-muted-foreground">
