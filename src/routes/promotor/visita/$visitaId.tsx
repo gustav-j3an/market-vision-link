@@ -98,15 +98,21 @@ function VisitaFlow() {
         status: isFinal ? 'concluido' : 'em_andamento'
       };
 
+      // Upload one by one to show progress or handle errors per file
+      // In this simple version we toast each, but could be refined
+      if (fotos.length > 0) {
+        toast.info(`Enviando ${fotos.length} fotos...`);
+      }
+
       await saveVisita(payload, itens, fotos, profile.empresa_id);
       
       toast.success(isFinal ? "Visita finalizada com sucesso!" : "Progresso salvo!");
       if (isFinal) {
         navigate({ to: "/promotor/roteiro" });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao salvar visita:", error);
-      toast.error("Erro ao salvar dados");
+      toast.error("Erro ao salvar dados: " + (error.message || "Falha na conexão"));
     } finally {
       setSaving(false);
     }
