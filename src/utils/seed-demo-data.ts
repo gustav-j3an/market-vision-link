@@ -62,10 +62,11 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
   
   if (promotorError) throw promotorError;
 
+  const promotorId = promotorRecord?.id;
+
   // 5. Seed Roteiros for Today
-  if (promotorRecord?.id && allStores && allStores.length > 0) {
+  if (promotorId && allStores && allStores.length > 0) {
     const today = new Date().toISOString().split('T')[0];
-    const promotorId = promotorRecord.id as string;
     
     const { data: existingRoteiros } = await supabase
       .from("roteiros")

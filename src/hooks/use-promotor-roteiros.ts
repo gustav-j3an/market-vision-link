@@ -25,13 +25,13 @@ export function usePromotorRoteiros() {
 
         if (promotorError) throw promotorError;
 
-        if (!promotorData?.id) {
+        const promotorId = promotorData?.id;
+        if (!promotorId) {
           setRoteiros([]);
           return;
         }
 
         const today = new Date().toISOString().split('T')[0];
-        const promotorId = promotorData.id as string;
         
         const { data, error } = await supabase
           .from('roteiros')
