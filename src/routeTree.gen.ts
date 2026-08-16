@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GestorRouteImport } from './routes/gestor'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as PromotorRouteImport } from './routes/promotor'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
@@ -30,6 +31,11 @@ const IndexRoute = IndexRouteImport.update({
 const GestorRoute = GestorRouteImport.update({
   id: '/gestor',
   path: '/gestor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PromotorRoute = PromotorRouteImport.update({
@@ -86,6 +92,7 @@ const GestorVisitasIndexRoute = GestorVisitasIndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/gestor': typeof GestorRouteWithChildren
+  '/onboarding': typeof OnboardingRoute
   '/promotor': typeof PromotorRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
@@ -100,6 +107,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/gestor': typeof GestorRouteWithChildren
+  '/onboarding': typeof OnboardingRoute
   '/promotor': typeof PromotorRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
@@ -115,6 +123,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/gestor': typeof GestorRouteWithChildren
+  '/onboarding': typeof OnboardingRoute
   '/promotor': typeof PromotorRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
@@ -131,6 +140,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/gestor'
+    | '/onboarding'
     | '/promotor'
     | '/auth/login'
     | '/auth/signup'
@@ -145,6 +155,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/gestor'
+    | '/onboarding'
     | '/promotor'
     | '/auth/login'
     | '/auth/signup'
@@ -159,6 +170,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/gestor'
+    | '/onboarding'
     | '/promotor'
     | '/auth/login'
     | '/auth/signup'
@@ -174,6 +186,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   GestorRoute: typeof GestorRouteWithChildren
+  OnboardingRoute: typeof OnboardingRoute
   PromotorRoute: typeof PromotorRouteWithChildren
   AuthLoginRoute: typeof AuthLoginRoute
   AuthSignupRoute: typeof AuthSignupRoute
@@ -193,6 +206,13 @@ declare module '@tanstack/react-router' {
       path: '/gestor'
       fullPath: '/gestor'
       preLoaderRoute: typeof GestorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/promotor': {
@@ -304,6 +324,7 @@ const PromotorRouteWithChildren = PromotorRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   GestorRoute: GestorRouteWithChildren,
+  OnboardingRoute: OnboardingRoute,
   PromotorRoute: PromotorRouteWithChildren,
   AuthLoginRoute: AuthLoginRoute,
   AuthSignupRoute: AuthSignupRoute,

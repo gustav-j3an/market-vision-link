@@ -21,6 +21,7 @@ function LoginComponent() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    console.log("Iniciando login para:", email);
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -29,22 +30,35 @@ function LoginComponent() {
       });
 
       if (error) throw error;
+      console.log("Login Auth sucesso:", data.user.id);
 
       toast.success("Login realizado com sucesso!");
       
       // Get profile to redirect correctly
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from("profiles")
-        .select("tipo")
+        .select("tipo, empresa_id")
         .eq("id", data.user.id)
-        .single();
+        .maybeSingle();
 
-      if (profile?.tipo === "gestor") {
+      if (profileError) {
+        console.error("Erro ao buscar perfil no login:", profileError);
+      }
+
+      console.log("Perfil carregado no login:", profile);
+
+      if (!profile?.empresa_id) {
+        console.log("Redirecionando para onboarding...");
+        navigate({ to: "/onboarding" as any });
+      } else if (profile.tipo === "gestor") {
+        console.log("Redirecionando para dashboard...");
         navigate({ to: "/gestor/dashboard" as any });
       } else {
+        console.log("Redirecionando para roteiro...");
         navigate({ to: "/promotor/roteiro" as any });
       }
     } catch (error: any) {
+      console.error("Erro no processo de login:", error);
       toast.error(error.message || "Erro ao realizar login");
     } finally {
       setIsLoading(false);

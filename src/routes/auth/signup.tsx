@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/auth/signup")({
   component: SignupComponent,
@@ -18,7 +18,6 @@ function SignupComponent() {
     name: "",
     email: "",
     password: "",
-    companyName: "",
     role: "gestor" as "gestor" | "promotor",
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -26,10 +25,10 @@ function SignupComponent() {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLoading) return;
     setIsLoading(true);
 
     try {
-      // 1. Sign up user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -43,26 +42,11 @@ function SignupComponent() {
       if (authError) throw authError;
       if (!authData.user) throw new Error("Erro ao criar usuário");
 
-      // 2. Create company if it doesn't exist (or just always create a new one for signup)
-      // For this SaaS, we'll assume a new signup always starts a new company trial
-      const slug = formData.companyName.toLowerCase().replace(/ /g, "-");
-      const { data: companyData, error: companyError } = await supabase
-        .from("empresas")
-        .insert({
-          nome: formData.companyName,
-          slug,
-        })
-        .select()
-        .single();
-
-      if (companyError) throw companyError;
-
-      // 3. Create profile
       const { error: profileError } = await supabase
         .from("profiles")
-        .insert({
+        .upsert({
           id: authData.user.id,
-          empresa_id: companyData.id,
+          empresa_id: null,
           email: formData.email,
           nome: formData.name,
           tipo: formData.role,
@@ -71,15 +55,9 @@ function SignupComponent() {
       if (profileError) throw profileError;
 
       toast.success("Cadastro realizado com sucesso!");
-      
-      if (formData.role === "gestor") {
-        navigate({ to: "/gestor/dashboard" as any });
-      } else {
-        navigate({ to: "/promotor/roteiro" as any });
-      }
+      navigate({ to: "/auth/login" as any });
     } catch (error: any) {
       toast.error(error.message || "Erro ao realizar cadastro");
-    } finally {
       setIsLoading(false);
     }
   };
@@ -91,12 +69,13 @@ function SignupComponent() {
           <CardTitle className="text-2xl font-bold text-primary">TradeVision</CardTitle>
           <CardDescription>Crie sua conta para começar.</CardDescription>
         </CardHeader>
-        <form onSubmit={handleSignup}>
-          <CardContent className="space-y-4">
+        <CardContent>
+          <form className="space-y-4" onSubmit={handleSignup} action="javascript:void(0)">
             <div className="space-y-2">
               <Label htmlFor="name">Nome Completo</Label>
               <Input 
                 id="name" 
+                name="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required 
@@ -106,6 +85,7 @@ function SignupComponent() {
               <Label htmlFor="email">E-mail</Label>
               <Input 
                 id="email" 
+                name="email"
                 type="email" 
                 placeholder="nome@exemplo.com" 
                 value={formData.email}
@@ -117,18 +97,10 @@ function SignupComponent() {
               <Label htmlFor="password">Senha</Label>
               <Input 
                 id="password" 
+                name="password"
                 type="password" 
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                required 
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="company">Nome da Empresa</Label>
-              <Input 
-                id="company" 
-                value={formData.companyName}
-                onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
                 required 
               />
             </div>
@@ -138,7 +110,7 @@ function SignupComponent() {
                 value={formData.role} 
                 onValueChange={(value: any) => setFormData({ ...formData, role: value })}
               >
-                <SelectTrigger>
+                <SelectTrigger id="role-trigger">
                   <SelectValue placeholder="Selecione o perfil" />
                 </SelectTrigger>
                 <SelectContent>
@@ -147,20 +119,29 @@ function SignupComponent() {
                 </SelectContent>
               </Select>
             </div>
-          </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Criar Conta
+            <Button 
+              id="signup-button"
+              type="submit" 
+              className="w-full h-12" 
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <ArrowRight className="mr-2 h-4 w-4" />
+              )}
+              Criar conta e Continuar
             </Button>
-            <div className="text-center text-sm text-muted-foreground">
-              Já tem uma conta?{" "}
-              <Link to="/auth/login" className="text-primary hover:underline">
-                Entrar
-              </Link>
-            </div>
-          </CardFooter>
-        </form>
+          </form>
+        </CardContent>
+        <CardFooter className="flex flex-col space-y-4">
+          <div className="text-center text-sm text-muted-foreground">
+            Já tem uma conta?{" "}
+            <Link to="/auth/login" className="text-primary hover:underline">
+              Entrar
+            </Link>
+          </div>
+        </CardFooter>
       </Card>
     </div>
   );

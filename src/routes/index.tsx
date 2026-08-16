@@ -28,7 +28,9 @@ function Index() {
 
   // Se já estiver logado, redireciona conforme o perfil
   if (user && profile && !profileError) {
-    if (profile.tipo === "gestor") {
+    if (!profile.empresa_id) {
+      return <Navigate to="/onboarding" replace />;
+    } else if (profile.tipo === "gestor") {
       return <Navigate to="/gestor/dashboard" replace />;
     } else if (profile.tipo === "promotor") {
       return <Navigate to="/promotor/roteiro" replace />;
