@@ -31,9 +31,7 @@ export function usePromotorRoteiros() {
         }
 
         const today = new Date().toISOString().split('T')[0];
-        
-        // Non-null assertion for TypeScript, already checked above
-        const pid: string = promotorData.id!;
+        const promotorId = promotorData.id as string;
         
         const { data, error } = await supabase
           .from('roteiros')
@@ -47,7 +45,7 @@ export function usePromotorRoteiros() {
               cidade
             )
           `)
-          .eq('promotor_id', pid)
+          .eq('promotor_id', promotorId)
           .eq('data_prevista', today)
           .order('horario_previsto', { ascending: true });
 

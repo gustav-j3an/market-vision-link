@@ -43,7 +43,7 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
   const storesToInsert = [
     { nome: "Pão de Açúcar", rede: "GPA", endereco: "Av. Paulista, 1000", cidade: "São Paulo", estado: "SP", empresa_id: empresaId },
     { nome: "Carrefour", rede: "Carrefour", endereco: "Rua Brooklin, 500", cidade: "São Paulo", estado: "SP", empresa_id: empresaId },
-    { nome: "Extra", rede: "GPA", endereco: "Av. Brigadeiro, 2000", cidade: "São Paulo", estado: "SP", endereco: "Av. Brigadeiro, 2000", cidade: "São Paulo", estado: "SP", empresa_id: empresaId },
+    { nome: "Extra", rede: "GPA", endereco: "Av. Brigadeiro, 2000", cidade: "São Paulo", estado: "SP", empresa_id: empresaId },
   ].filter(s => !existingStores?.some(es => es.nome === s.nome && es.rede === s.rede));
 
   if (storesToInsert.length > 0) {
@@ -65,12 +65,12 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
   // 5. Seed Roteiros for Today
   if (promotorRecord?.id && allStores && allStores.length > 0) {
     const today = new Date().toISOString().split('T')[0];
-    const pid: string = promotorRecord.id!; // Non-null assertion after the check above
+    const promotorId = promotorRecord.id as string;
     
     const { data: existingRoteiros } = await supabase
       .from("roteiros")
       .select("loja_id")
-      .eq("promotor_id", pid)
+      .eq("promotor_id", promotorId)
       .eq("data_prevista", today);
       
     const existingStoreIds = existingRoteiros?.map(r => r.loja_id) || [];
@@ -78,7 +78,7 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
     const roteirosToInsert = allStores
       .filter(s => !existingStoreIds.includes(s.id))
       .map(store => ({
-        promotor_id: pid,
+        promotor_id: promotorId,
         loja_id: store.id,
         data_prevista: today,
         horario_previsto: "09:00",
