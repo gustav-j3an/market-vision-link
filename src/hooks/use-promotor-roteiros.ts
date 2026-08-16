@@ -32,7 +32,7 @@ export function usePromotorRoteiros() {
         }
 
         const today = new Date().toISOString().split('T')[0];
-        const promotorId = promotorData.id;
+        const promotorId: string = promotorData.id;
         
         const { data, error } = await supabase
           .from('roteiros')
