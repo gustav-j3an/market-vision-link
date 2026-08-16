@@ -44,7 +44,7 @@ export async function seedDemoData(empresaId: string, profileId: string) {
       empresa_id: empresaId
     }));
 
-    const { error: roteirosError } = await supabase.from("roteiros").insert(roteiros);
+    const { error: roteirosError } = await supabase.from("roteiros").insert(roteiros as any);
     if (roteirosError) console.warn("Roteiros seeding failed:", roteirosError);
   }
 
