@@ -43,11 +43,15 @@ function Promotores() {
 
   return (
     <>
-      <PageHeader title="Promotores" description="Equipe em campo e indicadores de performance.">
-        <Button onClick={() => setIsFormOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Novo Promotor
-        </Button>
-      </PageHeader>
+      <PageHeader 
+        title="Promotores" 
+        description="Equipe em campo e indicadores de performance."
+        actions={
+          <Button onClick={() => setIsFormOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" /> Novo Promotor
+          </Button>
+        }
+      />
 
       {isLoading ? (
         <div className="flex justify-center py-12">
