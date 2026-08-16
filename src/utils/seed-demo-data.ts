@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { startOfWeek, format, addDays } from "date-fns";
+import { startOfWeek, format } from "date-fns";
 
 export async function seedDemoData(empresaId: string, gestorProfileId: string) {
   // 1. Get or Create a Demo Promoter Profile
@@ -41,14 +41,16 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
   const coca = allIndustries?.find(i => i.nome === "Coca-Cola");
   const nestle = allIndustries?.find(i => i.nome === "Nestlé");
 
+  if (!ambev || !coca || !nestle) throw new Error("Industries not created");
+
   // 3. Seed Products linked to industries
   const productsList = [
-    { nome: "Cerveja Brahma 600ml", marca: "Brahma", categoria: "Cervejas", sku: "BRA-600", industria_id: ambev?.id, empresa_id: empresaId },
-    { nome: "Cerveja Skol 600ml", marca: "Skol", categoria: "Cervejas", sku: "SKO-600", industria_id: ambev?.id, empresa_id: empresaId },
-    { nome: "Coca-Cola 2L", marca: "Coca-Cola", categoria: "Refrigerantes", sku: "COC-2L", industria_id: coca?.id, empresa_id: empresaId },
-    { nome: "Fanta Laranja 2L", marca: "Fanta", categoria: "Refrigerantes", sku: "FAN-2L", industria_id: coca?.id, empresa_id: empresaId },
-    { nome: "Nescau 400g", marca: "Nestlé", categoria: "Achocolatados", sku: "NES-400", industria_id: nestle?.id, empresa_id: empresaId },
-    { nome: "Leite Ninho 1kg", marca: "Ninho", categoria: "Leites", sku: "NIN-1KG", industria_id: nestle?.id, empresa_id: empresaId },
+    { nome: "Cerveja Brahma 600ml", marca: "Brahma", categoria: "Cervejas", sku: "BRA-600", industria_id: ambev.id, empresa_id: empresaId },
+    { nome: "Cerveja Skol 600ml", marca: "Skol", categoria: "Cervejas", sku: "SKO-600", industria_id: ambev.id, empresa_id: empresaId },
+    { nome: "Coca-Cola 2L", marca: "Coca-Cola", categoria: "Refrigerantes", sku: "COC-2L", industria_id: coca.id, empresa_id: empresaId },
+    { nome: "Fanta Laranja 2L", marca: "Fanta", categoria: "Refrigerantes", sku: "FAN-2L", industria_id: coca.id, empresa_id: empresaId },
+    { nome: "Nescau 400g", marca: "Nestlé", categoria: "Achocolatados", sku: "NES-400", industria_id: nestle.id, empresa_id: empresaId },
+    { nome: "Leite Ninho 1kg", marca: "Ninho", categoria: "Leites", sku: "NIN-1KG", industria_id: nestle.id, empresa_id: empresaId },
   ];
   
   const productSkus = productsList.map(p => p.sku).filter(Boolean) as string[];
@@ -116,6 +118,7 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
       .single();
 
     if (rsError) throw rsError;
+    if (!roteiroSemanal) throw new Error("Roteiro semanal not found");
 
     // 6.2 Paradas for Today
     const today = new Date();
@@ -135,7 +138,7 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
           roteiro_semanal_id: roteiroSemanal.id,
           promotor_id: promotorId,
           loja_id: allStores[0].id,
-          industria_id: ambev?.id,
+          industria_id: ambev.id,
           dia_semana: dayOfWeek,
           data: todayStr,
           horario_previsto: "08:00:00",
@@ -146,7 +149,7 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
           roteiro_semanal_id: roteiroSemanal.id,
           promotor_id: promotorId,
           loja_id: allStores[1].id,
-          industria_id: coca?.id,
+          industria_id: coca.id,
           dia_semana: dayOfWeek,
           data: todayStr,
           horario_previsto: "10:30:00",
@@ -157,14 +160,14 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
           roteiro_semanal_id: roteiroSemanal.id,
           promotor_id: promotorId,
           loja_id: allStores[2].id,
-          industria_id: nestle?.id,
+          industria_id: nestle.id,
           dia_semana: dayOfWeek,
           data: todayStr,
           horario_previsto: "14:00:00",
           ordem: 3,
           status: 'pendente'
         }
-      ].filter(p => p.industria_id);
+      ];
 
       const { data: createdParadas, error: paradasError } = await supabase
         .from("paradas_roteiro")
@@ -198,9 +201,10 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
           .single();
 
         if (visitError) throw visitError;
+        if (!visit) throw new Error("Visit not created");
 
         // 8. Visit Items (only for the industry of the parada)
-        const industryProducts = allProducts.filter(p => p.industria_id === parada.industria_id);
+        const industryProducts = (allProducts || []).filter(p => p.industria_id === parada.industria_id);
         const visitItems = industryProducts.map(p => ({
           visita_id: visit.id,
           produto_id: p.id,
@@ -208,7 +212,9 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
           preco: 9.90
         }));
 
-        await supabase.from("itens_visita").insert(visitItems as any);
+        if (visitItems.length > 0) {
+          await supabase.from("itens_visita").insert(visitItems as any);
+        }
 
         // 9. Photos
         const visitPhotos = [
