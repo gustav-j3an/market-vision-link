@@ -32,8 +32,8 @@ export function usePromotorRoteiros() {
 
         const today = new Date().toISOString().split('T')[0];
         
-        // Casting the id to any to bypass the strict Postgrest check for this specific instance
-        const promotorId = promotorData.id as any;
+        // Use a clean string variable for the query filter to satisfy Postgrest mapping
+        const promotorId: string = promotorData.id;
         
         const { data, error } = await supabase
           .from('roteiros')
