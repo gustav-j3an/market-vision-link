@@ -45,16 +45,16 @@ export const getDashboardStats = createServerFn({ method: "GET" })
       .lte('inicio', endIso);
 
     // 2. Ruptura stats
-    const visitaIds = (visitasConcluidas || []).map(v => v.id);
+    const vIds = (visitasConcluidas || []).map(v => v.id);
     let taxaRuptura = 0;
     let rupturasCount = 0;
     let itensVisita: any[] = [];
 
-    if (visitaIds.length > 0) {
+    if (vIds.length > 0) {
       const { data: itens } = await supabase
         .from('itens_visita')
         .select('status, produto_id, visita_id, produtos(nome, categoria)')
-        .in('visita_id', visitaIds);
+        .in('visita_id', vIds);
       
       itensVisita = itens || [];
       const totalItens = itensVisita.length;
@@ -109,10 +109,11 @@ export const getDashboardStats = createServerFn({ method: "GET" })
       if (i.status === 'nao_encontrado' || i.status === 'ruptura') {
         const prodData = i.produtos as any;
         const nome = prodData?.nome || 'Desconhecido';
-        if (!rupturaPorProduto[i.produto_id]) {
-          rupturaPorProduto[i.produto_id] = { nome, count: 0 };
+        const prodId = i.produto_id;
+        if (!rupturaPorProduto[prodId]) {
+          rupturaPorProduto[prodId] = { nome, count: 0 };
         }
-        rupturaPorProduto[i.produto_id].count++;
+        rupturaPorProduto[prodId].count++;
       }
     });
     
