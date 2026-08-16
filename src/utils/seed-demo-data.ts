@@ -67,12 +67,11 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
   // 5. Seed Roteiros for Today
   if (promotorId && allStores && allStores.length > 0) {
     const today = new Date().toISOString().split('T')[0];
-    const pid = String(promotorId);
     
     const { data: existingRoteiros } = await supabase
       .from("roteiros")
       .select("loja_id")
-      .eq("promotor_id", pid)
+      .eq("promotor_id", promotorId)
       .eq("data_prevista", today);
       
     const existingStoreIds = existingRoteiros?.map(r => r.loja_id) || [];
@@ -80,7 +79,7 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
     const roteirosToInsert = allStores
       .filter(s => !existingStoreIds.includes(s.id))
       .map(store => ({
-        promotor_id: pid,
+        promotor_id: promotorId,
         loja_id: store.id,
         data_prevista: today,
         horario_previsto: "09:00",

@@ -31,10 +31,7 @@ export function usePromotorRoteiros() {
         }
 
         const today = new Date().toISOString().split('T')[0];
-        
-        // This is where the error is likely happening because of how TS sees the return type of select('id').eq(...).maybeSingle()
-        // We'll force cast the ID to string and use it directly.
-        const promotorId = String(promotorData.id);
+        const promotorId = promotorData.id;
         
         const { data, error } = await supabase
           .from('roteiros')
