@@ -30,8 +30,8 @@ export function usePromotorRoteiros() {
         }
 
         const today = new Date().toISOString().split('T')[0];
+        const promotorId: string = promotorData.id;
         
-        // Fetch from the new paradas_roteiro table
         const { data, error } = await supabase
           .from('paradas_roteiro')
           .select(`
@@ -49,7 +49,7 @@ export function usePromotorRoteiros() {
               marca
             )
           `)
-          .eq('promotor_id', promotorData.id!)
+          .eq('promotor_id', promotorId)
           .eq('data', today)
           .order('ordem', { ascending: true });
 
