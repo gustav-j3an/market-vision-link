@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Clock, ArrowRight, Loader2 } from "lucide-react";
+import { MapPin, Clock, ArrowRight, Loader2, Briefcase } from "lucide-react";
 import { usePromotorRoteiros } from "@/hooks/use-promotor-roteiros";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
