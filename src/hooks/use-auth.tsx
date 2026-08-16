@@ -51,6 +51,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setProfile(null);
         setProfileError(false);
         setIsLoading(false);
+        // Garante que o estado de erro seja limpo ao deslogar
+        setProfileError(false);
       }
     });
 

@@ -30,15 +30,27 @@ function LoginComponent() {
       });
 
       if (error) throw error;
-      console.log("Login Auth sucesso:", data.user.id);
-
-      // We don't need to manually navigate here because onAuthStateChange 
-      // in use-auth will trigger and the layout guards will handle redirection.
-      // But to be immediate, we can try to refresh profile
+      console.log("Login Auth sucesso:", data.user?.id);
+      
+      toast.success("Login realizado com sucesso!");
+      
+      // Embora o AuthProvider trate o redirecionamento reativamente,
+      // em alguns casos de rede lenta ou estados de cache, forçamos um refresh
+      // do perfil para garantir que os guardiões de rota tenham dados frescos.
       console.log("Login realizado. Aguardando processamento da sessão...");
     } catch (error: any) {
       console.error("Erro no processo de login:", error);
-      toast.error(error.message || "Erro ao realizar login");
+      let errorMessage = "Erro ao realizar login";
+      
+      if (error.message === "Invalid login credentials") {
+        errorMessage = "E-mail ou senha incorretos.";
+      } else if (error.message?.includes("Email not confirmed")) {
+        errorMessage = "Por favor, confirme seu e-mail antes de acessar.";
+      } else {
+        errorMessage = error.message || "Erro de conexão. Tente novamente.";
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -78,7 +90,7 @@ function LoginComponent() {
           <CardFooter className="flex flex-col space-y-4">
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Entrar
+              {isLoading ? "Entrando..." : "Entrar"}
             </Button>
             <div className="text-center text-sm text-muted-foreground">
               Não tem uma conta?{" "}
