@@ -32,6 +32,7 @@ export function usePromotorRoteiros() {
         }
 
         const today = new Date().toISOString().split('T')[0];
+        const promotorId = promotorData.id;
         
         const { data, error } = await supabase
           .from('roteiros')
@@ -45,7 +46,7 @@ export function usePromotorRoteiros() {
               cidade
             )
           `)
-          .eq('promotor_id', promotorData.id)
+          .eq('promotor_id', promotorId)
           .eq('data_prevista', today)
           .order('horario_previsto', { ascending: true });
 
