@@ -43,9 +43,10 @@ function SignupComponent() {
       if (!authData.user) throw new Error("Erro ao criar usuário");
 
       // 2. Create profile (empresa_id is now null initially)
+      // We use upsert because the user might have partially signed up before
       const { error: profileError } = await supabase
         .from("profiles")
-        .insert({
+        .upsert({
           id: authData.user.id,
           empresa_id: null,
           email: formData.email,
@@ -57,9 +58,7 @@ function SignupComponent() {
 
       toast.success("Cadastro realizado com sucesso! Prossiga para configurar sua conta.");
       
-      // No TanStack Start, o signUp pode não disparar o onAuthStateChange imediatamente se houver confirmação de email
-      // ou se o estado não for propagado a tempo para o redirecionamento automático do Router.
-      // Vamos para o login para garantir a sessão se não redirecionar.
+      // Redirect to login to establish session
       navigate({ to: "/auth/login" as any });
     } catch (error: any) {
       toast.error(error.message || "Erro ao realizar cadastro");
