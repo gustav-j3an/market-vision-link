@@ -15,6 +15,8 @@ import { Route as PromotorRouteImport } from './routes/promotor'
 import { Route as GestorDashboardRouteImport } from './routes/gestor/dashboard'
 import { Route as PromotorRoteiroRouteImport } from './routes/promotor/roteiro'
 import { Route as GestorLojasIndexRouteImport } from './routes/gestor/lojas/index'
+import { Route as GestorProdutosIndexRouteImport } from './routes/gestor/produtos/index'
+import { Route as GestorPromotoresIndexRouteImport } from './routes/gestor/promotores/index'
 import { Route as GestorRelatoriosIndexRouteImport } from './routes/gestor/relatorios/index'
 import { Route as GestorVisitasIndexRouteImport } from './routes/gestor/visitas/index'
 
@@ -48,6 +50,16 @@ const GestorLojasIndexRoute = GestorLojasIndexRouteImport.update({
   path: '/lojas/',
   getParentRoute: () => GestorRoute,
 } as any)
+const GestorProdutosIndexRoute = GestorProdutosIndexRouteImport.update({
+  id: '/produtos/',
+  path: '/produtos/',
+  getParentRoute: () => GestorRoute,
+} as any)
+const GestorPromotoresIndexRoute = GestorPromotoresIndexRouteImport.update({
+  id: '/promotores/',
+  path: '/promotores/',
+  getParentRoute: () => GestorRoute,
+} as any)
 const GestorRelatoriosIndexRoute = GestorRelatoriosIndexRouteImport.update({
   id: '/relatorios/',
   path: '/relatorios/',
@@ -66,6 +78,8 @@ export interface FileRoutesByFullPath {
   '/gestor/dashboard': typeof GestorDashboardRoute
   '/promotor/roteiro': typeof PromotorRoteiroRoute
   '/gestor/lojas/': typeof GestorLojasIndexRoute
+  '/gestor/produtos/': typeof GestorProdutosIndexRoute
+  '/gestor/promotores/': typeof GestorPromotoresIndexRoute
   '/gestor/relatorios/': typeof GestorRelatoriosIndexRoute
   '/gestor/visitas/': typeof GestorVisitasIndexRoute
 }
@@ -76,6 +90,8 @@ export interface FileRoutesByTo {
   '/gestor/dashboard': typeof GestorDashboardRoute
   '/promotor/roteiro': typeof PromotorRoteiroRoute
   '/gestor/lojas': typeof GestorLojasIndexRoute
+  '/gestor/produtos': typeof GestorProdutosIndexRoute
+  '/gestor/promotores': typeof GestorPromotoresIndexRoute
   '/gestor/relatorios': typeof GestorRelatoriosIndexRoute
   '/gestor/visitas': typeof GestorVisitasIndexRoute
 }
@@ -87,6 +103,8 @@ export interface FileRoutesById {
   '/gestor/dashboard': typeof GestorDashboardRoute
   '/promotor/roteiro': typeof PromotorRoteiroRoute
   '/gestor/lojas/': typeof GestorLojasIndexRoute
+  '/gestor/produtos/': typeof GestorProdutosIndexRoute
+  '/gestor/promotores/': typeof GestorPromotoresIndexRoute
   '/gestor/relatorios/': typeof GestorRelatoriosIndexRoute
   '/gestor/visitas/': typeof GestorVisitasIndexRoute
 }
@@ -99,6 +117,8 @@ export interface FileRouteTypes {
     | '/gestor/dashboard'
     | '/promotor/roteiro'
     | '/gestor/lojas/'
+    | '/gestor/produtos/'
+    | '/gestor/promotores/'
     | '/gestor/relatorios/'
     | '/gestor/visitas/'
   fileRoutesByTo: FileRoutesByTo
@@ -109,6 +129,8 @@ export interface FileRouteTypes {
     | '/gestor/dashboard'
     | '/promotor/roteiro'
     | '/gestor/lojas'
+    | '/gestor/produtos'
+    | '/gestor/promotores'
     | '/gestor/relatorios'
     | '/gestor/visitas'
   id:
@@ -119,6 +141,8 @@ export interface FileRouteTypes {
     | '/gestor/dashboard'
     | '/promotor/roteiro'
     | '/gestor/lojas/'
+    | '/gestor/produtos/'
+    | '/gestor/promotores/'
     | '/gestor/relatorios/'
     | '/gestor/visitas/'
   fileRoutesById: FileRoutesById
@@ -173,6 +197,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GestorLojasIndexRouteImport
       parentRoute: typeof GestorRoute
     }
+    '/gestor/produtos/': {
+      id: '/gestor/produtos/'
+      path: '/produtos'
+      fullPath: '/gestor/produtos/'
+      preLoaderRoute: typeof GestorProdutosIndexRouteImport
+      parentRoute: typeof GestorRoute
+    }
+    '/gestor/promotores/': {
+      id: '/gestor/promotores/'
+      path: '/promotores'
+      fullPath: '/gestor/promotores/'
+      preLoaderRoute: typeof GestorPromotoresIndexRouteImport
+      parentRoute: typeof GestorRoute
+    }
     '/gestor/relatorios/': {
       id: '/gestor/relatorios/'
       path: '/relatorios'
@@ -193,6 +231,8 @@ declare module '@tanstack/react-router' {
 interface GestorRouteChildren {
   GestorDashboardRoute: typeof GestorDashboardRoute
   GestorLojasIndexRoute: typeof GestorLojasIndexRoute
+  GestorProdutosIndexRoute: typeof GestorProdutosIndexRoute
+  GestorPromotoresIndexRoute: typeof GestorPromotoresIndexRoute
   GestorRelatoriosIndexRoute: typeof GestorRelatoriosIndexRoute
   GestorVisitasIndexRoute: typeof GestorVisitasIndexRoute
 }
@@ -200,6 +240,8 @@ interface GestorRouteChildren {
 const GestorRouteChildren: GestorRouteChildren = {
   GestorDashboardRoute: GestorDashboardRoute,
   GestorLojasIndexRoute: GestorLojasIndexRoute,
+  GestorProdutosIndexRoute: GestorProdutosIndexRoute,
+  GestorPromotoresIndexRoute: GestorPromotoresIndexRoute,
   GestorRelatoriosIndexRoute: GestorRelatoriosIndexRoute,
   GestorVisitasIndexRoute: GestorVisitasIndexRoute,
 }
