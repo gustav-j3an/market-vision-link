@@ -70,6 +70,50 @@ export type Database = {
           },
         ]
       }
+      industrias: {
+        Row: {
+          categoria: string | null
+          contato: string | null
+          created_at: string
+          empresa_id: string
+          id: string
+          marca: string | null
+          nome: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          categoria?: string | null
+          contato?: string | null
+          created_at?: string
+          empresa_id: string
+          id?: string
+          marca?: string | null
+          nome: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          categoria?: string | null
+          contato?: string | null
+          created_at?: string
+          empresa_id?: string
+          id?: string
+          marca?: string | null
+          nome?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "industrias_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       itens_visita: {
         Row: {
           created_at: string
@@ -174,12 +218,90 @@ export type Database = {
           },
         ]
       }
+      paradas_roteiro: {
+        Row: {
+          created_at: string
+          data: string
+          dia_semana: number
+          horario_previsto: string | null
+          id: string
+          industria_id: string
+          loja_id: string
+          observacao: string | null
+          ordem: number
+          promotor_id: string
+          roteiro_semanal_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data: string
+          dia_semana: number
+          horario_previsto?: string | null
+          id?: string
+          industria_id: string
+          loja_id: string
+          observacao?: string | null
+          ordem?: number
+          promotor_id: string
+          roteiro_semanal_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data?: string
+          dia_semana?: number
+          horario_previsto?: string | null
+          id?: string
+          industria_id?: string
+          loja_id?: string
+          observacao?: string | null
+          ordem?: number
+          promotor_id?: string
+          roteiro_semanal_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "paradas_roteiro_industria_id_fkey"
+            columns: ["industria_id"]
+            isOneToOne: false
+            referencedRelation: "industrias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "paradas_roteiro_loja_id_fkey"
+            columns: ["loja_id"]
+            isOneToOne: false
+            referencedRelation: "lojas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "paradas_roteiro_promotor_id_fkey"
+            columns: ["promotor_id"]
+            isOneToOne: false
+            referencedRelation: "promotores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "paradas_roteiro_roteiro_semanal_id_fkey"
+            columns: ["roteiro_semanal_id"]
+            isOneToOne: false
+            referencedRelation: "roteiros_semanais"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       produtos: {
         Row: {
           categoria: string | null
           created_at: string
           empresa_id: string
           id: string
+          industria_id: string | null
           marca: string | null
           nome: string
           sku: string | null
@@ -190,6 +312,7 @@ export type Database = {
           created_at?: string
           empresa_id: string
           id?: string
+          industria_id?: string | null
           marca?: string | null
           nome: string
           sku?: string | null
@@ -200,6 +323,7 @@ export type Database = {
           created_at?: string
           empresa_id?: string
           id?: string
+          industria_id?: string | null
           marca?: string | null
           nome?: string
           sku?: string | null
@@ -211,6 +335,13 @@ export type Database = {
             columns: ["empresa_id"]
             isOneToOne: false
             referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "produtos_industria_id_fkey"
+            columns: ["industria_id"]
+            isOneToOne: false
+            referencedRelation: "industrias"
             referencedColumns: ["id"]
           },
         ]
@@ -301,6 +432,45 @@ export type Database = {
           },
         ]
       }
+      promotores_industrias: {
+        Row: {
+          created_at: string
+          id: string
+          industria_id: string
+          promotor_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          industria_id: string
+          promotor_id: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          industria_id?: string
+          promotor_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promotores_industrias_industria_id_fkey"
+            columns: ["industria_id"]
+            isOneToOne: false
+            referencedRelation: "industrias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotores_industrias_promotor_id_fkey"
+            columns: ["promotor_id"]
+            isOneToOne: false
+            referencedRelation: "promotores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       roteiros: {
         Row: {
           created_at: string
@@ -359,18 +529,68 @@ export type Database = {
           },
         ]
       }
+      roteiros_semanais: {
+        Row: {
+          created_at: string
+          empresa_id: string
+          id: string
+          nome: string | null
+          promotor_id: string
+          semana_referencia: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          empresa_id: string
+          id?: string
+          nome?: string | null
+          promotor_id: string
+          semana_referencia: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          empresa_id?: string
+          id?: string
+          nome?: string | null
+          promotor_id?: string
+          semana_referencia?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "roteiros_semanais_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "roteiros_semanais_promotor_id_fkey"
+            columns: ["promotor_id"]
+            isOneToOne: false
+            referencedRelation: "promotores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       visitas: {
         Row: {
           created_at: string
           empresa_id: string
           fim: string | null
           id: string
+          industria_id: string | null
           inicio: string
           latitude: number | null
           loja_id: string
           longitude: number | null
           nota_execucao: number | null
           observacoes: string | null
+          parada_id: string | null
           promotor_id: string
           roteiro_id: string | null
           status: string
@@ -381,12 +601,14 @@ export type Database = {
           empresa_id: string
           fim?: string | null
           id?: string
+          industria_id?: string | null
           inicio?: string
           latitude?: number | null
           loja_id: string
           longitude?: number | null
           nota_execucao?: number | null
           observacoes?: string | null
+          parada_id?: string | null
           promotor_id: string
           roteiro_id?: string | null
           status: string
@@ -397,12 +619,14 @@ export type Database = {
           empresa_id?: string
           fim?: string | null
           id?: string
+          industria_id?: string | null
           inicio?: string
           latitude?: number | null
           loja_id?: string
           longitude?: number | null
           nota_execucao?: number | null
           observacoes?: string | null
+          parada_id?: string | null
           promotor_id?: string
           roteiro_id?: string | null
           status?: string
@@ -417,10 +641,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "visitas_industria_id_fkey"
+            columns: ["industria_id"]
+            isOneToOne: false
+            referencedRelation: "industrias"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "visitas_loja_id_fkey"
             columns: ["loja_id"]
             isOneToOne: false
             referencedRelation: "lojas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visitas_parada_id_fkey"
+            columns: ["parada_id"]
+            isOneToOne: false
+            referencedRelation: "paradas_roteiro"
             referencedColumns: ["id"]
           },
           {
@@ -445,6 +683,13 @@ export type Database = {
     }
     Functions: {
       get_my_empresa_id: { Args: never; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_gestor: { Args: never; Returns: boolean }
     }
     Enums: {
