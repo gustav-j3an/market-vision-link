@@ -44,20 +44,21 @@ function VisitaFlow() {
       if (!profile?.empresa_id || !visitaId) return;
       try {
         setLoading(true);
-        // Load roteiro
-        const { data: roteiroData, error: roteiroError } = await supabase
-          .from('roteiros')
+        // Load parada (reusing visitaId as paradaId for now, but in a real scenario they are separate)
+        const { data: paradaData, error: pError } = await supabase
+          .from('paradas_roteiro')
           .select('*, lojas(*)')
           .eq('id', visitaId)
           .single();
         
-        if (roteiroError) throw roteiroError;
-        setRoteiro(roteiroData);
+        if (pError) throw pError;
+        setRoteiro(paradaData);
 
-        // Load company products
+        // Load industry products
         const { data: productsData, error: productsError } = await supabase
           .from('produtos')
           .select('*')
+          .eq('industria_id', paradaData.industria_id)
           .eq('empresa_id', profile.empresa_id);
         
         if (productsError) throw productsError;
