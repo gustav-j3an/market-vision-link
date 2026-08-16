@@ -24,15 +24,11 @@ function SignupComponent() {
   const navigate = useNavigate();
 
   const handleSignup = async (e: React.FormEvent) => {
-    // We use a regular form submission handler
     e.preventDefault();
-    
     if (isLoading) return;
     setIsLoading(true);
 
     try {
-      console.log("Signup trigger for:", formData.email);
-      
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -59,13 +55,9 @@ function SignupComponent() {
       if (profileError) throw profileError;
 
       toast.success("Cadastro realizado com sucesso!");
-      
-      // Use navigate directly
       navigate({ to: "/auth/login" as any });
     } catch (error: any) {
-      console.error("Signup error:", error);
       toast.error(error.message || "Erro ao realizar cadastro");
-    } finally {
       setIsLoading(false);
     }
   };
@@ -78,7 +70,7 @@ function SignupComponent() {
           <CardDescription>Crie sua conta para começar.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="space-y-4" onSubmit={handleSignup}>
+          <form className="space-y-4" onSubmit={handleSignup} action="javascript:void(0)">
             <div className="space-y-2">
               <Label htmlFor="name">Nome Completo</Label>
               <Input 
