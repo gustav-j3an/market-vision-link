@@ -32,7 +32,8 @@ export function usePromotorRoteiros() {
         }
 
         const today = new Date().toISOString().split('T')[0];
-        const promotorId = promotorData.id;
+        // Explicitly cast to string to satisfy TS and ensure it's not undefined
+        const promotorId = promotorData.id as string;
         
         const { data, error } = await supabase
           .from('roteiros')
