@@ -24,17 +24,15 @@ function SignupComponent() {
   const navigate = useNavigate();
 
   const handleSignup = async (e: React.FormEvent) => {
-    // Prevent default form behavior just in case
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
+    // We use a regular form submission handler
+    e.preventDefault();
     
     if (isLoading) return;
-    
     setIsLoading(true);
 
     try {
+      console.log("Signup trigger for:", formData.email);
+      
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -62,10 +60,12 @@ function SignupComponent() {
 
       toast.success("Cadastro realizado com sucesso!");
       
-      // Use window.location for reliability in the test sandbox environment
-      window.location.href = "/auth/login";
+      // Use navigate directly
+      navigate({ to: "/auth/login" as any });
     } catch (error: any) {
+      console.error("Signup error:", error);
       toast.error(error.message || "Erro ao realizar cadastro");
+    } finally {
       setIsLoading(false);
     }
   };
@@ -78,12 +78,12 @@ function SignupComponent() {
           <CardDescription>Crie sua conta para começar.</CardDescription>
         </CardHeader>
         <CardContent>
-          {/* USANDO DIV COM BOTÃO PARA EVITAR COMPORTAMENTO ESTRANHO DO FORM NO SANDBOX */}
-          <div className="space-y-4">
+          <form className="space-y-4" onSubmit={handleSignup}>
             <div className="space-y-2">
               <Label htmlFor="name">Nome Completo</Label>
               <Input 
                 id="name" 
+                name="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required 
@@ -93,6 +93,7 @@ function SignupComponent() {
               <Label htmlFor="email">E-mail</Label>
               <Input 
                 id="email" 
+                name="email"
                 type="email" 
                 placeholder="nome@exemplo.com" 
                 value={formData.email}
@@ -104,6 +105,7 @@ function SignupComponent() {
               <Label htmlFor="password">Senha</Label>
               <Input 
                 id="password" 
+                name="password"
                 type="password" 
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -116,7 +118,7 @@ function SignupComponent() {
                 value={formData.role} 
                 onValueChange={(value: any) => setFormData({ ...formData, role: value })}
               >
-                <SelectTrigger>
+                <SelectTrigger id="role-trigger">
                   <SelectValue placeholder="Selecione o perfil" />
                 </SelectTrigger>
                 <SelectContent>
@@ -126,15 +128,19 @@ function SignupComponent() {
               </Select>
             </div>
             <Button 
-              type="button" 
+              id="signup-button"
+              type="submit" 
               className="w-full h-12" 
               disabled={isLoading}
-              onClick={handleSignup}
             >
-              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowRight className="mr-2 h-4 w-4" />}
+              {isLoading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <ArrowRight className="mr-2 h-4 w-4" />
+              )}
               Criar conta e Continuar
             </Button>
-          </div>
+          </form>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
           <div className="text-center text-sm text-muted-foreground">
