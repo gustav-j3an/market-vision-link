@@ -29,7 +29,7 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
   ];
   
   const productSkus = productsList.map(p => p.sku);
-  const { data: existingProducts } = await supabase.from("produtos").select("id, sku").eq("empresa_id", empresaId).in("sku", productSkus);
+  const { data: existingProducts } = await supabase.from("produtos").select("id, sku").eq("empresa_id", empresaId).in("sku", productSkus as string[]);
   const existingSkus = existingProducts?.map(p => p.sku) || [];
 
   const productsToInsert = productsList.filter(p => !existingSkus.includes(p.sku || ""));
@@ -86,7 +86,7 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
     if (storesNeedingRoteiro.length > 0) {
       const roteirosToInsert = storesNeedingRoteiro.map((store, index) => ({
         promotor_id: promotorId,
-        loja_id: store.id!,
+        loja_id: store.id,
         data_prevista: today,
         horario_previsto: index === 0 ? "08:00" : index === 1 ? "10:30" : "14:00",
         status: 'pendente' as any,
@@ -131,8 +131,7 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
           visita_id: visit.id,
           produto_id: p.id,
           status: (p.nome?.includes("Cola") ? 'ruptura' : 'em_estoque') as any,
-          preco: p.nome?.includes("Suco") ? 8.90 : p.nome?.includes("Cerveja") ? 12.50 : 5.50,
-          empresa_id: empresaId
+          preco: p.nome?.includes("Suco") ? 8.90 : p.nome?.includes("Cerveja") ? 12.50 : 5.50
         }));
 
         const { error: itemsError } = await supabase.from("itens_visita").insert(visitItems as any);
@@ -143,18 +142,16 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
           {
             visita_id: visit.id,
             caminho_arquivo: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=800",
-            legenda: "Gôndola de Bebidas - Início da Visita",
-            empresa_id: empresaId
+            legenda: "Gôndola de Bebidas - Início da Visita"
           },
           {
             visita_id: visit.id,
             caminho_arquivo: "https://images.unsplash.com/photo-1604719312566-8912e9227c6a?auto=format&fit=crop&q=80&w=800",
-            legenda: "Exposição Frontal - Sucos",
-            empresa_id: empresaId
+            legenda: "Exposição Frontal - Sucos"
           }
         ];
 
-        const { error: photosError } = await supabase.from("visita_fotos").insert(visitPhotos as any);
+        const { error: photosError } = await supabase.from("fotos_visita").insert(visitPhotos as any);
         if (photosError) throw photosError;
 
         // 4. Update Roteiro status
