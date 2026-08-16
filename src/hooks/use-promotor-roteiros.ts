@@ -50,7 +50,7 @@ export function usePromotorRoteiros() {
             )
           `)
           .eq('promotor_id', promotorId as any)
-          .eq('data', today)
+          .eq('data', today as any)
           .order('ordem', { ascending: true });
 
         if (error) throw error;
