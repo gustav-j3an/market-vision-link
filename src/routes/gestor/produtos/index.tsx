@@ -46,11 +46,12 @@ function Produtos() {
       <PageHeader 
         title="Produtos" 
         description="Catálogo e indicadores de disponibilidade de SKU." 
-      >
-        <Button onClick={() => setIsFormOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Novo Produto
-        </Button>
-      </PageHeader>
+        actions={
+          <Button onClick={() => setIsFormOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" /> Novo Produto
+          </Button>
+        }
+      />
 
       {isLoading ? (
         <div className="flex justify-center py-12">
