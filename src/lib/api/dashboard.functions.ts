@@ -108,7 +108,9 @@ export const getDashboardStats = createServerFn({ method: "GET" })
     itensVisita
       .filter(i => i.status === 'nao_encontrado' || i.status === 'ruptura')
       .forEach(i => {
-        const nome = i.produtos?.nome || 'Desconhecido';
+        // Safe access to nested products table data
+        const prodData = i.produtos as any;
+        const nome = prodData?.nome || 'Desconhecido';
         if (!rupturaPorProduto[i.produto_id]) {
           rupturaPorProduto[i.produto_id] = { nome, count: 0 };
         }
