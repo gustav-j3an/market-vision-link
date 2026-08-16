@@ -1,5 +1,5 @@
-
 import React, { useState, useEffect } from "react";
+import { createFileRoute } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -14,7 +14,11 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-export default function RoteirosPage() {
+export const Route = createFileRoute("/gestor/roteiros/")({
+  component: RoteirosPage,
+});
+
+function RoteirosPage() {
   const { profile } = useAuth();
   const [roteiros, setRoteiros] = useState<Roteiro[]>([]);
   const [loading, setLoading] = useState(true);
@@ -145,3 +149,5 @@ export default function RoteirosPage() {
 function cn(...inputs: any[]) {
   return inputs.filter(Boolean).join(" ");
 }
+
+

@@ -14,16 +14,17 @@ import { toast } from "sonner";
 import { Loader2, Camera, Check, ChevronLeft, ChevronRight, Save } from "lucide-react";
 import { saveVisita } from "@/lib/api/visitas";
 
-export const Route = createFileRoute("/promotor/visita/$visitaId" as any)({
+export const Route = createFileRoute("/promotor/visita/$visitaId")({
   component: VisitaFlow,
 });
 
 type Step = 'check-in' | 'produtos' | 'fotos' | 'resumo';
 
 function VisitaFlow() {
-  const { visitaId } = useParams({ from: "/promotor/visita/$visitaId" as any }) as any;
+  const { visitaId } = Route.useParams();
   const { profile } = useAuth();
   const navigate = useNavigate();
+
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
