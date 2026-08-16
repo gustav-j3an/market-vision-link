@@ -58,11 +58,47 @@ export async function createRoteiro(roteiro: {
   data_prevista: string;
   horario_previsto: string | null;
   empresa_id: string;
-  status?: string;
+  observacoes?: string | null;
+  status?: RoteiroStatus;
 }) {
+  // Check for duplicates
+  const { data: existing, error: checkError } = await supabase
+    .from('roteiros')
+    .select('id')
+    .eq('promotor_id', roteiro.promotor_id)
+    .eq('loja_id', roteiro.loja_id)
+    .eq('data_prevista', roteiro.data_prevista)
+    .eq('horario_previsto', roteiro.horario_previsto as any)
+    .maybeSingle();
+
+  if (checkError) throw checkError;
+  if (existing) throw new Error("Já existe um roteiro para este promotor nesta loja, data e horário.");
+
   const { data, error } = await supabase
     .from('roteiros')
-    .insert(roteiro)
+    .insert({
+      ...roteiro,
+      status: roteiro.status || 'pendente'
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function updateRoteiro(id: string, roteiro: Partial<{
+  promotor_id: string;
+  loja_id: string;
+  data_prevista: string;
+  horario_previsto: string | null;
+  observacoes?: string | null;
+  status?: RoteiroStatus;
+}>) {
+  const { data, error } = await supabase
+    .from('roteiros')
+    .update(roteiro)
+    .eq('id', id)
     .select()
     .single();
 
