@@ -24,7 +24,12 @@ function SignupComponent() {
   const navigate = useNavigate();
 
   const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
+    // Prevent default form behavior just in case
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
     if (isLoading) return;
     
     setIsLoading(true);
@@ -56,7 +61,9 @@ function SignupComponent() {
       if (profileError) throw profileError;
 
       toast.success("Cadastro realizado com sucesso!");
-      navigate({ to: "/auth/login" as any });
+      
+      // Use window.location for reliability in the test sandbox environment
+      window.location.href = "/auth/login";
     } catch (error: any) {
       toast.error(error.message || "Erro ao realizar cadastro");
       setIsLoading(false);
