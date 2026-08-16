@@ -28,6 +28,7 @@ function SignupComponent() {
     if (isLoading) return;
     
     setIsLoading(true);
+    console.log("Iniciando signup...");
 
     try {
       const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -43,6 +44,8 @@ function SignupComponent() {
       if (authError) throw authError;
       if (!authData.user) throw new Error("Erro ao criar usuário");
 
+      console.log("Usuário criado, inserindo perfil...");
+
       const { error: profileError } = await supabase
         .from("profiles")
         .upsert({
@@ -55,9 +58,13 @@ function SignupComponent() {
 
       if (profileError) throw profileError;
 
-      toast.success("Cadastro realizado com sucesso! Prossiga para configurar sua conta.");
-      navigate({ to: "/auth/login" as any });
+      console.log("Perfil criado, navegando...");
+      toast.success("Cadastro realizado com sucesso!");
+      
+      // Use window.location for a hard redirect if TanStack Router navigate is failing in this environment
+      window.location.href = "/auth/login";
     } catch (error: any) {
+      console.error("Erro no signup:", error);
       toast.error(error.message || "Erro ao realizar cadastro");
       setIsLoading(false);
     }
