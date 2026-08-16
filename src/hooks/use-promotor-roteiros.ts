@@ -45,9 +45,10 @@ export function usePromotorRoteiros() {
               cidade
             )
           `)
-          .eq('promotor_id', (promotorData as any).id)
+          .eq('promotor_id', (promotorData as { id: string }).id)
           .eq('data_prevista', today)
           .order('horario_previsto', { ascending: true });
+
 
 
 
