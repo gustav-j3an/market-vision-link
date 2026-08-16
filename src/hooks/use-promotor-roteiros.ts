@@ -25,16 +25,13 @@ export function usePromotorRoteiros() {
 
         if (promotorError) throw promotorError;
 
-        if (!promotorData?.id) {
+        const promotorId = promotorData?.id;
+        if (!promotorId) {
           setRoteiros([]);
           return;
         }
 
         const today = new Date().toISOString().split('T')[0];
-        
-        // Use Type Assertion for the whole query chain or the specific field
-        // The error TS2345 in .eq('promotor_id', promotorId) suggests it thinks promotorId is string | undefined
-        const promotorId = promotorData.id as string;
         
         const { data, error } = await supabase
           .from('roteiros')
@@ -48,7 +45,7 @@ export function usePromotorRoteiros() {
               cidade
             )
           `)
-          .eq('promotor_id', promotorId)
+          .eq('promotor_id', promotorId as string)
           .eq('data_prevista', today)
           .order('horario_previsto', { ascending: true });
 
