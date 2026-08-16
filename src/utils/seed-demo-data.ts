@@ -137,7 +137,7 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
         {
           roteiro_semanal_id: roteiroSemanal.id,
           promotor_id: promotorId,
-          loja_id: allStores[0].id,
+          loja_id: allStores[0]?.id || '',
           industria_id: ambev.id,
           dia_semana: dayOfWeek,
           data: todayStr,
@@ -148,7 +148,7 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
         {
           roteiro_semanal_id: roteiroSemanal.id,
           promotor_id: promotorId,
-          loja_id: allStores[1].id,
+          loja_id: allStores[1]?.id || '',
           industria_id: coca.id,
           dia_semana: dayOfWeek,
           data: todayStr,
@@ -159,7 +159,7 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
         {
           roteiro_semanal_id: roteiroSemanal.id,
           promotor_id: promotorId,
-          loja_id: allStores[2].id,
+          loja_id: allStores[2]?.id || '',
           industria_id: nestle.id,
           dia_semana: dayOfWeek,
           data: todayStr,
