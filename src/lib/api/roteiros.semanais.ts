@@ -50,10 +50,10 @@ export async function createRoteiroSemanal(roteiro: Omit<RoteiroSemanal, 'id' | 
   return data;
 }
 
-export async function createParadaRoteiro(parada: Omit<ParadaRoteiro, 'id' | 'created_at' | 'updated_at'>) {
+export async function createParadaRoteiro(parada: Omit<ParadaRoteiro, 'id' | 'created_at' | 'updated_at' | 'loja' | 'industria' | 'promotor'>) {
   const { data, error } = await supabase
     .from('paradas_roteiro')
-    .insert(parada)
+    .insert(parada as any)
     .select()
     .single();
 
