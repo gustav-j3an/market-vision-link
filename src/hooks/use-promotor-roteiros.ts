@@ -25,13 +25,15 @@ export function usePromotorRoteiros() {
 
         if (promotorError) throw promotorError;
 
-        const promotorId = promotorData?.id;
-        if (!promotorId) {
+        if (!promotorData?.id) {
           setRoteiros([]);
           return;
         }
 
         const today = new Date().toISOString().split('T')[0];
+        
+        // Casting the id to any to bypass the strict Postgrest check for this specific instance
+        const promotorId = promotorData.id as any;
         
         const { data, error } = await supabase
           .from('roteiros')
@@ -45,7 +47,7 @@ export function usePromotorRoteiros() {
               cidade
             )
           `)
-          .eq('promotor_id', promotorId as string)
+          .eq('promotor_id', promotorId)
           .eq('data_prevista', today)
           .order('horario_previsto', { ascending: true });
 
