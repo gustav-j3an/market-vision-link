@@ -50,7 +50,7 @@ export function ParadaForm({ open, onOpenChange, onSuccess, roteiroSemanalId, pr
   const [lojas, setLojas] = useState<any[]>([]);
   const [industrias, setIndustrias] = useState<any[]>([]);
   
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       dia_semana: "1",
