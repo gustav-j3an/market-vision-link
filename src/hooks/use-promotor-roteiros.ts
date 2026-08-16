@@ -31,7 +31,9 @@ export function usePromotorRoteiros() {
         }
 
         const today = new Date().toISOString().split('T')[0];
-        const promotorId = promotorData.id;
+        
+        // Use a local constant with non-null assertion or guard to satisfy TS
+        const promotorId = promotorData.id!;
         
         const { data, error } = await supabase
           .from('roteiros')
