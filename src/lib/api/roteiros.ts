@@ -1,7 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-export type RoteiroStatus = 'pendente' | 'em_andamento' | 'concluido' | 'cancelado';
+export type RoteiroStatus = 'pendente' | 'em_andamento' | 'concluido' | 'concluida' | 'cancelado';
 
 export interface RoteiroSemanal {
   id: string;
