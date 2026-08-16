@@ -26,7 +26,7 @@ export function usePromotorRoteiros() {
 
         if (promotorError) throw promotorError;
 
-        if (!promotorData) {
+        if (!promotorData || !promotorData.id) {
           setRoteiros([]);
           return;
         }
@@ -45,13 +45,9 @@ export function usePromotorRoteiros() {
               cidade
             )
           `)
-          .eq('promotor_id', (promotorData as { id: string }).id!)
+          .eq('promotor_id', promotorData.id as string)
           .eq('data_prevista', today)
           .order('horario_previsto', { ascending: true });
-
-
-
-
 
         if (error) throw error;
         

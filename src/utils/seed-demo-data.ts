@@ -3,14 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 
 export async function seedDemoData(empresaId: string, gestorProfileId: string) {
   // 1. Get or Create a Demo Promoter Profile
-  // We need a promoter to assign the route to. In a demo, we can use the current user
-  // if they are a promoter, or look for an existing promoter in the company.
-  
   let targetProfileId = gestorProfileId;
   const { data: currentProfile } = await supabase.from("profiles").select("tipo").eq("id", gestorProfileId).single();
   
   if (currentProfile?.tipo !== "promotor") {
-    // If current user is a gestor, we try to find a promoter profile in the same company
     const { data: otherPromoter } = await supabase
       .from("profiles")
       .select("id")
@@ -55,7 +51,6 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
     if (storesError) throw storesError;
   }
 
-  // Get all stores for seeding roteiros
   const { data: allStores } = await supabase.from("lojas").select("id").eq("empresa_id", empresaId);
 
   // 4. Seed Promoter Record
@@ -67,26 +62,22 @@ export async function seedDemoData(empresaId: string, gestorProfileId: string) {
   
   if (promotorError) throw promotorError;
 
-  // 5. Seed Roteiros for Today (Avoid duplicates for the same day/store/promoter)
-  if (promotorRecord && allStores && allStores.length > 0) {
-    // Get date in YYYY-MM-DD format (UTC but consistent for today)
+  // 5. Seed Roteiros for Today
+  if (promotorRecord && promotorRecord.id && allStores && allStores.length > 0) {
     const today = new Date().toISOString().split('T')[0];
     
     const { data: existingRoteiros } = await supabase
       .from("roteiros")
       .select("loja_id")
-      .eq("promotor_id", (promotorRecord as { id: string }).id!)
+      .eq("promotor_id", promotorRecord.id as string)
       .eq("data_prevista", today);
-
-
-
       
     const existingStoreIds = existingRoteiros?.map(r => r.loja_id) || [];
 
     const roteirosToInsert = allStores
       .filter(s => !existingStoreIds.includes(s.id))
       .map(store => ({
-        promotor_id: promotorRecord.id,
+        promotor_id: (promotorRecord as any).id,
         loja_id: store.id,
         data_prevista: today,
         horario_previsto: "09:00",
