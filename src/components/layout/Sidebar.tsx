@@ -51,7 +51,6 @@ export function Sidebar({ type = "gestor" }: { type?: "gestor" | "promotor" }) {
   const gestorItems = [
     { icon: LayoutDashboard, label: "Visão Geral", href: "/gestor/dashboard" },
     { icon: RouteIcon, label: "Roteiros", href: "/gestor/roteiros" },
-    { icon: BarChart3, label: "Analytics", href: "/gestor/analytics" },
     { icon: MapPin, label: "Lojas", href: "/gestor/lojas" },
     { icon: Package, label: "Produtos", href: "/gestor/produtos" },
     { icon: Users, label: "Promotores", href: "/gestor/promotores" },
@@ -60,8 +59,6 @@ export function Sidebar({ type = "gestor" }: { type?: "gestor" | "promotor" }) {
 
   const promotorItems = [
     { icon: RouteIcon, label: "Meu Roteiro", href: "/promotor/roteiro" },
-    { icon: MapPin, label: "Lojas Próximas", href: "/promotor/lojas" },
-    { icon: FileText, label: "Meu Histórico", href: "/promotor/historico" },
   ];
 
   const items = type === "gestor" ? gestorItems : promotorItems;
