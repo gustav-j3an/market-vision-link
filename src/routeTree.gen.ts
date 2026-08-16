@@ -10,6 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as GestorRouteImport } from './routes/gestor'
+import { Route as PromotorRouteImport } from './routes/promotor'
 import { Route as GestorDashboardRouteImport } from './routes/gestor/dashboard'
 import { Route as PromotorRoteiroRouteImport } from './routes/promotor/roteiro'
 
@@ -18,45 +20,68 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const GestorDashboardRoute = GestorDashboardRouteImport.update({
-  id: '/gestor/dashboard',
-  path: '/gestor/dashboard',
+const GestorRoute = GestorRouteImport.update({
+  id: '/gestor',
+  path: '/gestor',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PromotorRoteiroRoute = PromotorRoteiroRouteImport.update({
-  id: '/promotor/roteiro',
-  path: '/promotor/roteiro',
+const PromotorRoute = PromotorRouteImport.update({
+  id: '/promotor',
+  path: '/promotor',
   getParentRoute: () => rootRouteImport,
+} as any)
+const GestorDashboardRoute = GestorDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => GestorRoute,
+} as any)
+const PromotorRoteiroRoute = PromotorRoteiroRouteImport.update({
+  id: '/roteiro',
+  path: '/roteiro',
+  getParentRoute: () => PromotorRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/gestor': typeof GestorRouteWithChildren
+  '/promotor': typeof PromotorRouteWithChildren
   '/gestor/dashboard': typeof GestorDashboardRoute
   '/promotor/roteiro': typeof PromotorRoteiroRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/gestor': typeof GestorRouteWithChildren
+  '/promotor': typeof PromotorRouteWithChildren
   '/gestor/dashboard': typeof GestorDashboardRoute
   '/promotor/roteiro': typeof PromotorRoteiroRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/gestor': typeof GestorRouteWithChildren
+  '/promotor': typeof PromotorRouteWithChildren
   '/gestor/dashboard': typeof GestorDashboardRoute
   '/promotor/roteiro': typeof PromotorRoteiroRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/gestor/dashboard' | '/promotor/roteiro'
+  fullPaths:
+    '/' | '/gestor' | '/promotor' | '/gestor/dashboard' | '/promotor/roteiro'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/gestor/dashboard' | '/promotor/roteiro'
-  id: '__root__' | '/' | '/gestor/dashboard' | '/promotor/roteiro'
+  to: '/' | '/gestor' | '/promotor' | '/gestor/dashboard' | '/promotor/roteiro'
+  id:
+    | '__root__'
+    | '/'
+    | '/gestor'
+    | '/promotor'
+    | '/gestor/dashboard'
+    | '/promotor/roteiro'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  GestorDashboardRoute: typeof GestorDashboardRoute
-  PromotorRoteiroRoute: typeof PromotorRoteiroRoute
+  GestorRoute: typeof GestorRouteWithChildren
+  PromotorRoute: typeof PromotorRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -68,27 +93,64 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/gestor': {
+      id: '/gestor'
+      path: '/gestor'
+      fullPath: '/gestor'
+      preLoaderRoute: typeof GestorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/promotor': {
+      id: '/promotor'
+      path: '/promotor'
+      fullPath: '/promotor'
+      preLoaderRoute: typeof PromotorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/gestor/dashboard': {
       id: '/gestor/dashboard'
-      path: '/gestor/dashboard'
+      path: '/dashboard'
       fullPath: '/gestor/dashboard'
       preLoaderRoute: typeof GestorDashboardRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof GestorRoute
     }
     '/promotor/roteiro': {
       id: '/promotor/roteiro'
-      path: '/promotor/roteiro'
+      path: '/roteiro'
       fullPath: '/promotor/roteiro'
       preLoaderRoute: typeof PromotorRoteiroRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof PromotorRoute
     }
   }
 }
 
+interface GestorRouteChildren {
+  GestorDashboardRoute: typeof GestorDashboardRoute
+}
+
+const GestorRouteChildren: GestorRouteChildren = {
+  GestorDashboardRoute: GestorDashboardRoute,
+}
+
+const GestorRouteWithChildren =
+  GestorRoute._addFileChildren(GestorRouteChildren)
+
+interface PromotorRouteChildren {
+  PromotorRoteiroRoute: typeof PromotorRoteiroRoute
+}
+
+const PromotorRouteChildren: PromotorRouteChildren = {
+  PromotorRoteiroRoute: PromotorRoteiroRoute,
+}
+
+const PromotorRouteWithChildren = PromotorRoute._addFileChildren(
+  PromotorRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  GestorDashboardRoute: GestorDashboardRoute,
-  PromotorRoteiroRoute: PromotorRoteiroRoute,
+  GestorRoute: GestorRouteWithChildren,
+  PromotorRoute: PromotorRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
